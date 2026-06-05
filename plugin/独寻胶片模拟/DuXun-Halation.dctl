@@ -1,0 +1,45 @@
+/*
+ * DuXun-Halation.dctl
+ * ======================
+ * Red-Channel Halation Effect for DaVinci Resolve Studio
+ *
+ * Author: film-sim-plugin team
+ * Version: 1.0.0
+ * License: MIT
+ *
+ * Color Science:
+ *   Halation is caused by light passing through the film emulsion,
+ *   reflecting off the film base, and exposing the emulsion a second
+ *   time. Because only red light (long wavelength) penetrates deeply
+ *   enough, halation appears as a red-orange glow around bright areas.
+ *
+ *   Physical model:
+ *     I_halation(r) = I(r) * alpha * exp(-r / sigma)
+ *
+ *   This DCTL uses a per-pixel approximation based on red channel
+ *   excess and luminance-dependent scatter (spatial convolution
+ *   requires OFX -- this is the DCTL-compatible approximation).
+ *
+ * Pipeline Position:
+ *   Apply AFTER color pipeline (Contrast→Matrix→Density→CMY)
+ *   and BEFORE display transform. Works on the final image.
+ *
+ * Dependencies:
+ *   DuXun-Texture.h → DuXun-Common.h
+ */
+
+#include "DuXun-Texture.h"
+
+DEFINE_UI_PARAMS(STRENGTH,  Strength,  DCTLUI_SLIDER_FLOAT, 0.3, 0.0, 1.0, 0.01,
+    "Halation intensity (0.0 = off, 1.0 = max glow)")
+DEFINE_UI_PARAMS(SPREAD,    Spread,    DCTLUI_SLIDER_FLOAT, 0.5, 0.0, 1.0, 0.01,
+    "Scatter spread (higher = softer, wider glow)")
+DEFINE_UI_PARAMS(REDNESS,   Redness,   DCTLUI_SLIDER_FLOAT, 1.0, 0.5, 1.5, 0.01,
+    "Redness of the halation glow (1.0 = natural, 1.5 = intense)")
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y,
+                             float p_R, float p_G, float p_B)
+{
+    float3 rgb = make_float3(p_R, p_G, p_B);
+    return _film_halation_local(rgb, STRENGTH, SPREAD, REDNESS);
+}

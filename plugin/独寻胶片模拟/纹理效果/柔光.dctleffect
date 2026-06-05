@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dctleffect>
+  <effect>
+    <name>柔光</name>
+    <description>独寻胶片模拟 -- 高光柔化散射效果</description>
+    <category>独寻胶片模拟</category>
+    <subcategory>纹理效果</subcategory>
+  </effect>
+  <params>
+    <param name="STRENGTH"  displayName="柔光强度"   type="float" default="0.2" min="0.0" max="1.0" step="0.01"/>
+    <param name="THRESHOLD" displayName="亮度阈值"   type="float" default="0.7" min="0.5" max="1.0" step="0.01"/>
+    <param name="SPREAD"    displayName="散射柔和度" type="float" default="0.4" min="0.0" max="1.0" step="0.01"/>
+  </params>
+</dctleffect>

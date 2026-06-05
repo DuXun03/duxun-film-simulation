@@ -1,0 +1,69 @@
+/*
+ * DuXun-Display.dctl
+ * =====================
+ * Display Transform (DWG/DI → Rec.709 / sRGB) for DaVinci Resolve Studio
+ *
+ * Author: film-sim-plugin team
+ * Version: 1.0.0
+ * License: MIT
+ *
+ * Purpose:
+ *   The final step of the film simulation pipeline. Takes your
+ *   color-graded image in DaVinci Wide Gamut / Intermediate and
+ *   transforms it to display-referred Rec.709 or sRGB.
+ *
+ *   This replaces the standard Resolve CST (Color Space Transform)
+ *   node at the end of your pipeline, giving you a filmic tone map
+ *   instead of the standard linear transform.
+ *
+ * Pipeline Position:
+ *   LAST node before output. After all color corrections and effects.
+ *
+ * Typical node chain:
+ *   [CST: Camera Log → DWG/DI]
+ *   [DuXun-Core / Full Pipeline]
+ *   [DuXun-Display]  ← This DCTL (replaces final CST)
+ *   [Output]
+ *
+ * Display Modes:
+ *   Rec.709 (broadcast standard) / sRGB (web/computers)
+ *   Selectable via the Gamma Mode dropdown.
+ *
+ * Dependencies:
+ *   DuXun-Display.h → DuXun-Common.h
+ */
+
+#include "DuXun-Display.h"
+
+/*
+ * Tone mapping controls
+ */
+DEFINE_UI_PARAMS(CONTRAST,  Contrast,  DCTLUI_SLIDER_FLOAT, 1.0, 0.5, 2.0, 0.01,
+    "Tone mapping contrast (1.0 = neutral)")
+DEFINE_UI_PARAMS(SHOULDER,  Shoulder,  DCTLUI_SLIDER_FLOAT, 1.0, 0.5, 2.0, 0.01,
+    "Highlight compression shoulder")
+DEFINE_UI_PARAMS(EXPOSURE,  Exposure,  DCTLUI_SLIDER_FLOAT, 0.0, -3.0, 3.0, 0.1,
+    "Exposure offset in stops")
+
+/*
+ * Output gamma controls
+ */
+DEFINE_UI_PARAMS(GAMMA_MODE,Gamma Mode, DCTLUI_COMBO_BOX, 0, 0, 1, 1,
+    "0:Rec.709 (gamma 2.4)|1:sRGB (piecewise)")
+DEFINE_UI_PARAMS(GAMMA,     Gamma,      DCTLUI_SLIDER_FLOAT, 2.4, 1.8, 2.6, 0.1,
+    "Custom gamma value (only used in Rec.709 mode)")
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y,
+                             float p_R, float p_G, float p_B)
+{
+    float3 rgb = make_float3(p_R, p_G, p_B);
+
+    /* Determine gamma mode */
+    int use_srgb = ((int)GAMMA_MODE == 1) ? 1 : 0;
+
+    /* Apply full display transform pipeline */
+    rgb = _film_display_transform(rgb, CONTRAST, SHOULDER, EXPOSURE,
+                                   GAMMA, use_srgb);
+
+    return rgb;
+}

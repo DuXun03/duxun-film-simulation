@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dctleffect>
+  <effect>
+    <name>胶片颗粒</name>
+    <description>独寻胶片模拟 -- 3D噪声自然胶片颗粒</description>
+    <category>独寻胶片模拟</category>
+    <subcategory>纹理效果</subcategory>
+  </effect>
+  <params>
+    <param name="STRENGTH" displayName="颗粒强度" type="float" default="0.15" min="0.0" max="0.5" step="0.01"/>
+    <param name="SCALE"    displayName="颗粒粗细" type="float" default="2.5"  min="0.5" max="8.0" step="0.1"/>
+    <param name="FRAME"    displayName="帧号"     type="float" default="0.0"  min="0.0" max="1000.0" step="1.0"/>
+    <param name="LUM_LO"   displayName="暗部衰减" type="float" default="0.05" min="0.0" max="0.3" step="0.01"/>
+    <param name="LUM_HI"   displayName="高光衰减" type="float" default="0.95" min="0.7" max="1.0" step="0.01"/>
+  </params>
+</dctleffect>

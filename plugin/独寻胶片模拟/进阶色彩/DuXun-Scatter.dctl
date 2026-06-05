@@ -1,0 +1,80 @@
+/*
+ * DuXun-Scatter.dctl
+ * =====================
+ * Light Scatter (Shadow/Highlight Bleed) for DaVinci Resolve Studio
+ *
+ * Author: film-sim-plugin team
+ * Engine: ported from boomyjee/mycolor (MIT License)
+ * Version: 1.0.0
+ * License: MIT
+ *
+ * Color Science:
+ *   Simulates optical light scattering through photographic emulsion.
+ *   Two independent physical effects:
+ *
+ *   1. Shadow Scatter: warm chromatic bleed into dark areas
+ *      (light passing through emulsion and reflecting back)
+ *
+ *   2. Highlight Scatter: specular bloom with wavelength-dependent
+ *      fringing (shorter wavelengths scatter more = blue fringing)
+ *
+ *   Uses YIQ color space to preserve luminance during scatter,
+ *   preventing the scatter from changing overall exposure.
+ *
+ * Pipeline Position:
+ *   Optional advanced module. Apply near end of pipeline (after Density,
+ *   before Display Transform) for natural film-like scatter effects.
+ *
+ * Dependencies:
+ *   DuXun-Mycolor.h (auto-includes DuXun-Common.h)
+ */
+
+#include "DuXun-Mycolor.h"
+
+/*
+ * Shadow scatter controls
+ */
+DEFINE_UI_PARAMS(SHD_ANGLE, Shadow Hue,  DCTLUI_SLIDER_FLOAT, 0.0, 0.0, 360.0, 1.0,
+    "Shadow scatter hue angle (30 = warm orange, 210 = cool blue)")
+DEFINE_UI_PARAMS(SHD_MIX,   Shadow Mix,  DCTLUI_SLIDER_FLOAT, 0.3, 0.0, 1.0, 0.01,
+    "Shadow scatter intensity")
+
+/*
+ * Highlight scatter controls
+ */
+DEFINE_UI_PARAMS(HL_ANGLE,  Highlight Hue, DCTLUI_SLIDER_FLOAT, 200.0, 0.0, 360.0, 1.0,
+    "Highlight scatter hue angle (200 = cool cyan, 30 = warm bloom)")
+DEFINE_UI_PARAMS(HL_MIX,    Highlight Mix, DCTLUI_SLIDER_FLOAT, 0.15, 0.0, 1.0, 0.01,
+    "Highlight scatter intensity")
+
+/*
+ * Global mix
+ */
+DEFINE_UI_PARAMS(MIX,       Scatter Mix,   DCTLUI_SLIDER_FLOAT, 1.0, 0.0, 1.0, 0.01,
+    "Overall scatter blend (1.0 = full effect)")
+
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y,
+                             float p_R, float p_G, float p_B)
+{
+    float3 rgb = make_float3(p_R, p_G, p_B);
+
+    /* Compute colorimetric values */
+    float lum = _film_luminance_safe(rgb);
+    float maxRGB = _fmaxf(rgb.x, _fmaxf(rgb.y, rgb.z));
+    float hue = _my_rgb2hue_simple(rgb);
+
+    /* Calculate shadow scatter parameters from angle/distance */
+    float4 shadows = _film_calc_shadows_highlights(SHD_ANGLE, SHD_MIX, 0.0f);
+    float4 highlights = _film_calc_shadows_highlights(HL_ANGLE, HL_MIX, 1.0f);
+
+    /* Apply light scatter */
+    float3 scattered = _film_skatter(rgb, shadows, highlights, hue, maxRGB, lum);
+
+    /* Blend with original */
+    rgb = _film_lerp(rgb.x, scattered.x, MIX);
+    rgb.y = _film_lerp(rgb.y, scattered.y, MIX);
+    rgb.z = _film_lerp(rgb.z, scattered.z, MIX);
+
+    return _film_clamp3(rgb);
+}

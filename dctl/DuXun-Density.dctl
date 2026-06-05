@@ -1,0 +1,58 @@
+/*
+ * DuXun-Density.dctl
+ * =====================
+ * Dye Density Simulation for DaVinci Resolve Studio
+ *
+ * Author: 独寻 (Lin Xinyu) & Senior Developer (film-sim-plugin team)
+ * Version: 2.0.1
+ * License: MIT
+ *
+ * Color Science:
+ *   Film images are formed by CMY dye clouds in three emulsion layers.
+ *   The relationship between dye concentration and optical density is
+ *   non-linear (deviations from Beer-Lambert law):
+ *
+ *     1. Peak chroma at medium density (optimal dye separation ~0.58)
+ *     2. Chroma compression in dense/dark areas (dye crowding)
+ *     3. Highlight chroma roll-off (specular purity)
+ *     4. Shadow saturation preservation (prevent muddy blacks)
+ *     5. Density-dependent hue shift (warmth in shadows)
+ *
+ * Pipeline Position:
+ *   Node 3 of 4-step pipeline. Apply AFTER color matrix.
+ *
+ * Changes v2.0.1:
+ *   - Uses DuXun-Common.h for unified density model
+ *   - Added DEFINE_UI_PARAMS for interactive Resolve sliders
+ *   - FIXED: hue shift now applied to chroma ratios (not raw RGB),
+ *     eliminating the bug where hue changes were partially overwritten
+ *   - Blend ratio now adjustable via slider
+ */
+
+#include "DuXun-Common.h"
+
+/*
+ * Resolve DCTL UI Parameters
+ */
+DEFINE_UI_PARAMS(DENSITY,    Density,     DCTLUI_SLIDER_FLOAT, 0.85, 0.0, 1.5, 0.01,
+    "Overall dye density strength")
+DEFINE_UI_PARAMS(CHROMA_ROLL,Chroma Roll, DCTLUI_SLIDER_FLOAT, 0.6, 0.0, 1.0, 0.01,
+    "Highlight saturation compression")
+DEFINE_UI_PARAMS(SHADOW_SAT, Shadow Sat,  DCTLUI_SLIDER_FLOAT, 0.3, 0.0, 1.0, 0.01,
+    "Shadow saturation preservation")
+DEFINE_UI_PARAMS(HUE_SHIFT,  Hue Shift,   DCTLUI_SLIDER_FLOAT, 0.15, 0.0, 0.5, 0.01,
+    "Density-dependent warmth shift")
+DEFINE_UI_PARAMS(BLEND,      Blend,       DCTLUI_SLIDER_FLOAT, 0.8, 0.0, 1.0, 0.01,
+    "Mix ratio (1.0 = full effect)")
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y,
+                             float p_R, float p_G, float p_B)
+{
+    float3 rgb = make_float3(p_R, p_G, p_B);
+
+    /* Apply unified density model from shared library */
+    rgb = _film_density_apply(rgb, DENSITY, CHROMA_ROLL, SHADOW_SAT,
+                              HUE_SHIFT, BLEND);
+
+    return _film_clamp3(rgb);
+}

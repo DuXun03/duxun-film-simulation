@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dctleffect>
+  <effect>
+    <name>独寻胶片模拟</name>
+    <description>DuXun Film Simulation -- 专业电影胶片色彩模拟插件，支持 7 种经典胶片 Stock，完整的 S-Curve + 色彩矩阵 + 染料密度 + 减色色彩头管线</description>
+    <category>色彩</category>
+    <subcategory>独寻胶片模拟</subcategory>
+    <version>3.0.0</version>
+    <author>独寻 (Lin Xinyu)</author>
+  </effect>
+  <params>
+    <!-- ====== 胶片曲线 ====== -->
+    <group name="对比度曲线">
+      <param name="CONTRAST"   displayName="对比度"     type="float" default="1.15" min="0.5" max="2.0"  step="0.01"/>
+      <param name="PIVOT"      displayName="中灰基准"   type="float" default="0.18" min="0.1" max="0.25" step="0.01"/>
+      <param name="SHOULDER"   displayName="高光压缩"   type="float" default="0.35" min="0.0" max="1.0"  step="0.01"/>
+      <param name="TOE"        displayName="暗部提升"   type="float" default="0.25" min="0.0" max="1.0"  step="0.01"/>
+      <param name="BLACK_PT"   displayName="黑点偏移"   type="float" default="0.0"  min="-0.05" max="0.05" step="0.001"/>
+    </group>
+    <!-- ====== 胶片色彩矩阵 ====== -->
+    <group name="色彩矩阵">
+      <param name="FILM_STOCK" displayName="胶片 Stock"  type="combo" default="0" values="Kodak 2383|Fuji 3513|Kodak Vision3|Fuji Eterna|Technicolor|Bleach Bypass|Identity"/>
+      <param name="MATRIX_MIX" displayName="矩阵混合"   type="float" default="0.75" min="0.0" max="1.0" step="0.01"/>
+      <param name="LUM_KEEP"   displayName="亮度保持"   type="float" default="0.5"  min="0.0" max="1.0" step="0.01"/>
+    </group>
+    <!-- ====== 染料密度 ====== -->
+    <group name="染料密度">
+      <param name="DENSITY"    displayName="染料浓度"   type="float" default="0.85" min="0.0" max="1.5" step="0.01"/>
+      <param name="CHROMA_RL"  displayName="高光饱和压缩" type="float" default="0.6" min="0.0" max="1.0" step="0.01"/>
+      <param name="SHADOW_SAT" displayName="暗部饱和保持" type="float" default="0.3" min="0.0" max="1.0" step="0.01"/>
+      <param name="HUE_SHIFT"  displayName="色相偏移"   type="float" default="0.15" min="0.0" max="0.5" step="0.01"/>
+    </group>
+    <!-- ====== CMY减色 ====== -->
+    <group name="减色色彩头">
+      <param name="WARMTH"     displayName="色温偏移"   type="float" default="0.05" min="-0.5" max="0.5" step="0.01"/>
+    </group>
+  </params>
+</dctleffect>

@@ -1,0 +1,31 @@
+# DCTL compile cache
+*.dctlcc
+
+# Local build outputs
+build/
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.dll
+*.ofx
+*.log
+
+# Local Git worktrees
+.worktrees/
+worktrees/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Resolve test exports
+*.dpx
+*.exr
+__pycache__/
+.pytest_cache/

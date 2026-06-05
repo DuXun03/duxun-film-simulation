@@ -1,0 +1,63 @@
+/*
+ * DuXun-Contrast.dctl
+ * =====================
+ * Film Characteristic Curve Simulation for DaVinci Resolve Studio
+ *
+ * Author: 独寻 (Lin Xinyu) & Senior Developer (film-sim-plugin team)
+ * Version: 2.0.0
+ * License: MIT
+ *
+ * Color Science:
+ *   Models the Cineon D-log-H curve: toe (shadow compression),
+ *   straight-line (midtones), shoulder (highlight roll-off).
+ *
+ *   Cineon encoding: CV = 685 * log10(E) + 470
+ *   18% gray maps to CV 470, which is 0.0 log exposure.
+ *
+ * Pipeline Position:
+ *   Node 1 of 4-step pipeline. Apply BEFORE color matrix.
+ *   Input: scene-linear or DWG/DI
+ *   Output: same color space with film tonal response
+ *
+ * Changes v2.0:
+ *   - Uses DuXun-Common.h for shared math (eliminates code duplication)
+ *   - Added DEFINE_UI_PARAMS for interactive Resolve sliders
+ *   - Fixed potential division-by-zero in deep toe calculation
+ *   - Parameter ranges standardized to SMPTE convention
+ */
+
+#include "DuXun-Common.h"
+
+/*
+ * Resolve DCTL UI Parameters
+ * Adjust these interactively in the DCTL OFX panel on Color page.
+ */
+DEFINE_UI_PARAMS(CONTRAST,  Contrast,  DCTLUI_SLIDER_FLOAT, 1.15, 0.5, 2.0, 0.01,
+    "Midtone contrast strength (1.0 = neutral)")
+DEFINE_UI_PARAMS(PIVOT,     Pivot,     DCTLUI_SLIDER_FLOAT, 0.18, 0.10, 0.25, 0.01,
+    "Middle gray reference (0.18 = 18% gray)")
+DEFINE_UI_PARAMS(SHOULDER,  Shoulder,  DCTLUI_SLIDER_FLOAT, 0.35, 0.0, 1.0, 0.01,
+    "Highlight roll-off compression")
+DEFINE_UI_PARAMS(TOE,       Toe,       DCTLUI_SLIDER_FLOAT, 0.25, 0.0, 1.0, 0.01,
+    "Shadow compression / lift")
+DEFINE_UI_PARAMS(BLACK_PT,  Black Pt,  DCTLUI_SLIDER_FLOAT, 0.0, -0.05, 0.05, 0.001,
+    "Black point offset (negative crushes blacks)")
+DEFINE_UI_PARAMS(WHITE_PT,  White Pt,  DCTLUI_SLIDER_FLOAT, 1.0, 0.5, 2.0, 0.01,
+    "Output white scale multiplier")
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y,
+                             float p_R, float p_G, float p_B)
+{
+    float3 rgb = make_float3(p_R, p_G, p_B);
+
+    /* Apply unified S-curve from shared library */
+    rgb = _film_s_curve3(rgb, CONTRAST, PIVOT, SHOULDER, TOE, BLACK_PT);
+
+    /* White point scaling */
+    rgb.x *= WHITE_PT;
+    rgb.y *= WHITE_PT;
+    rgb.z *= WHITE_PT;
+
+    /* Clamp to safe output range */
+    return _film_clamp3(rgb);
+}

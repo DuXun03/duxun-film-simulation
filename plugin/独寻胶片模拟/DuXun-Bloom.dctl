@@ -1,0 +1,47 @@
+/*
+ * DuXun-Bloom.dctl
+ * ===================
+ * Bloom / Glow Effect for DaVinci Resolve Studio
+ *
+ * Author: film-sim-plugin team
+ * Derived from Halation model (full-spectrum generalization)
+ * Version: 1.0.0
+ * License: MIT
+ *
+ * Color Science:
+ *   Bloom is the softening of bright highlights due to light
+ *   scattering in the lens and emulsion. Unlike halation (which
+ *   is red-only), bloom affects all wavelengths equally.
+ *
+ *   Bloom produces:
+ *   1. Soft glow around specular highlights
+ *   2. Slight highlight desaturation (veiling flare)
+ *   3. Perceived dynamic range compression
+ *
+ *   This DCTL uses a luminance-threshold model: only pixels
+ *   above the threshold contribute to bloom, with Gaussian
+ *   spread and saturation reduction.
+ *
+ * Pipeline Position:
+ *   Apply AFTER color pipeline, alongside or instead of Halation.
+ *   Usually placed before Halation in the node chain.
+ *
+ * Dependencies:
+ *   DuXun-Texture.h → DuXun-Common.h
+ */
+
+#include "DuXun-Texture.h"
+
+DEFINE_UI_PARAMS(STRENGTH,  Strength,   DCTLUI_SLIDER_FLOAT, 0.2, 0.0, 1.0, 0.01,
+    "Bloom intensity (0.0 = off, 1.0 = max glow)")
+DEFINE_UI_PARAMS(THRESHOLD, Threshold,  DCTLUI_SLIDER_FLOAT, 0.7, 0.5, 1.0, 0.01,
+    "Luminance threshold for bloom activation (lower = more bloom)")
+DEFINE_UI_PARAMS(SPREAD,    Spread,     DCTLUI_SLIDER_FLOAT, 0.4, 0.0, 1.0, 0.01,
+    "Bloom softness (higher = more diffuse glow)")
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y,
+                             float p_R, float p_G, float p_B)
+{
+    float3 rgb = make_float3(p_R, p_G, p_B);
+    return _film_bloom_local(rgb, STRENGTH, THRESHOLD, SPREAD);
+}

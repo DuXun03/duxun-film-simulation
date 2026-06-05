@@ -1,0 +1,68 @@
+/*
+ * DuXun-Grain.dctl
+ * ===================
+ * Natural Film Grain Effect for DaVinci Resolve Studio
+ *
+ * Author: film-sim-plugin team
+ * Algorithm: based on mattdesl/glsl-film-grain (MIT) + Martins Upitis
+ * Version: 1.0.0
+ * License: MIT
+ *
+ * Color Science:
+ *   Film grain is caused by the random distribution of silver halide
+ *   crystals in the emulsion. Key characteristics:
+ *
+ *   1. Poisson distribution across the image plane
+ *   2. Independent RGB channels (each dye cloud layer is separate)
+ *   3. Luminance-adaptive visibility: most visible in midtones,
+ *      suppressed in deep shadows and bright highlights
+ *   4. Temporal independence: each frame has unique grain pattern
+ *
+ *   This DCTL uses 3D hash-based noise with channel offsets to
+ *   approximate the independent RGB grain structure.
+ *
+ * Pipeline Position:
+ *   Apply at the VERY END of the pipeline, after all color
+ *   processing and display transform. Grain should be the
+ *   last effect before output.
+ *
+ * Performance Note:
+ *   This is a noise-based grain (not sampled texture), so it's
+ *   GPU-friendly with constant-time per-pixel cost.
+ *
+ * Dependencies:
+ *   DuXun-Texture.h → DuXun-Common.h
+ */
+
+#include "DuXun-Texture.h"
+
+/*
+ * Grain generation controls
+ */
+DEFINE_UI_PARAMS(STRENGTH,  Strength,  DCTLUI_SLIDER_FLOAT, 0.15, 0.0, 0.5, 0.01,
+    "Grain intensity (0.0 = clean, 0.5 = heavy grain)")
+DEFINE_UI_PARAMS(SCALE,     Scale,     DCTLUI_SLIDER_FLOAT, 2.5, 0.5, 8.0, 0.1,
+    "Grain scale (lower = coarser grain, higher = finer)")
+DEFINE_UI_PARAMS(FRAME,     Frame,     DCTLUI_SLIDER_FLOAT, 0.0, 0.0, 1000.0, 1.0,
+    "Frame number for temporal variation")
+
+/*
+ * Luminance response controls
+ */
+DEFINE_UI_PARAMS(LUM_LO,    Shadow Fade, DCTLUI_SLIDER_FLOAT, 0.05, 0.0, 0.3, 0.01,
+    "Luminance below which grain fades out (shadow suppression)")
+DEFINE_UI_PARAMS(LUM_HI,    Highlight Fade, DCTLUI_SLIDER_FLOAT, 0.95, 0.7, 1.0, 0.01,
+    "Luminance above which grain fades out (highlight suppression)")
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y,
+                             float p_R, float p_G, float p_B)
+{
+    float3 rgb = make_float3(p_R, p_G, p_B);
+
+    /* Generate per-channel grain */
+    float3 grain = _film_grain3D(p_X, p_Y, p_Width, p_Height,
+                                  FRAME, SCALE, STRENGTH);
+
+    /* Apply with luminance-adaptive response */
+    return _film_grain_apply(rgb, grain, LUM_LO, LUM_HI);
+}

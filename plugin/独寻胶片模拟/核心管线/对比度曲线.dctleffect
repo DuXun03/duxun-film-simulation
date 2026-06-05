@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dctleffect>
+  <effect>
+    <name>对比度曲线</name>
+    <description>独寻胶片模拟 -- 胶片特性曲线：Cineon 风格的肩部/趾部 S 曲线，控制高光压缩和暗部提升</description>
+    <category>独寻胶片模拟</category>
+    <subcategory>核心管线</subcategory>
+    <version>1.0.0</version>
+  </effect>
+  <params>
+    <param name="CONTRAST"   displayName="对比度"     type="float" default="1.15" min="0.5" max="2.0" step="0.01"/>
+    <param name="PIVOT"      displayName="中灰基准"   type="float" default="0.18" min="0.1" max="0.25" step="0.01"/>
+    <param name="SHOULDER"   displayName="高光压缩"   type="float" default="0.35" min="0.0" max="1.0" step="0.01"/>
+    <param name="TOE"        displayName="暗部提升"   type="float" default="0.25" min="0.0" max="1.0" step="0.01"/>
+    <param name="BLACK_PT"   displayName="黑点偏移"   type="float" default="0.0"  min="-0.05" max="0.05" step="0.001"/>
+    <param name="WHITE_PT"   displayName="白点缩放"   type="float" default="1.0"  min="0.5" max="2.0" step="0.01"/>
+  </params>
+</dctleffect>

@@ -1,0 +1,56 @@
+/*
+ * DuXun-Matrix.dctl
+ * ====================
+ * Film Color Matrix (Spectral Sensitivity Cross-Coupling)
+ * for DaVinci Resolve Studio
+ *
+ * Author: 独寻 (Lin Xinyu) & Senior Developer (film-sim-plugin team)
+ * Version: 2.0.0
+ * License: MIT
+ *
+ * Color Science:
+ *   Film emulsion layers have overlapping spectral sensitivities,
+ *   creating characteristic color crosstalk:
+ *     - Red layer picks up some green → warmer skin tones
+ *     - Green layer sees some red and blue → richer greens
+ *     - Blue layer picks up green → slightly muted blues
+ *
+ *   This is modeled as a 3x3 RGB cross-coupling matrix.
+ *   7 film stock presets are available (select in UI).
+ *
+ * Pipeline Position:
+ *   Node 2 of 4-step pipeline. Apply AFTER contrast curve.
+ *
+ * Changes v2.0:
+ *   - Uses DuXun-Common.h for unified matrix functions
+ *   - Added DEFINE_UI_PARAMS for interactive Resolve sliders
+ *   - Unified to 7 presets (matching standalone + Technicolor + Identity)
+ *   - Luminance preservation strength now adjustable via slider
+ */
+
+#include "DuXun-Common.h"
+
+/*
+ * Resolve DCTL UI Parameters
+ */
+DEFINE_UI_PARAMS(PRESET,     Film Stock, DCTLUI_COMBO_BOX, 0, 0, 6, 1,
+    "0:Kodak 2383|1:Fuji 3513|2:Kodak Vision3|3:Fuji Eterna|4:Technicolor|5:Bleach Bypass|6:Identity")
+DEFINE_UI_PARAMS(STRENGTH,   Mix,        DCTLUI_SLIDER_FLOAT, 0.75, 0.0, 1.0, 0.01,
+    "Matrix blend strength (0.0 = no effect)")
+DEFINE_UI_PARAMS(LUM_KEEP,   Lum Preserve, DCTLUI_SLIDER_FLOAT, 0.5, 0.0, 1.0, 0.01,
+    "Luminance preservation strength (reduces exposure shift)")
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y,
+                             float p_R, float p_G, float p_B)
+{
+    float3 rgb = make_float3(p_R, p_G, p_B);
+
+    /* Get selected film stock matrix */
+    float mat[9];
+    _film_matrix_get((int)PRESET, mat);
+
+    /* Apply matrix with luminance preservation blend */
+    rgb = _film_matrix_apply(rgb, mat, STRENGTH, LUM_KEEP);
+
+    return _film_clamp3(rgb);
+}

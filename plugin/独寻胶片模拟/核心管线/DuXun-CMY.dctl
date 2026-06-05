@@ -1,0 +1,62 @@
+/*
+ * DuXun-CMY.dctl
+ * =================
+ * CMY Subtractive Color Head (Printer Lights Simulation)
+ * for DaVinci Resolve Studio
+ *
+ * Author: 独寻 (Lin Xinyu) & Senior Developer (film-sim-plugin team)
+ * Version: 2.0.0
+ * License: MIT
+ *
+ * Color Science:
+ *   Color photographic printing uses subtractive CMY filters.
+ *   Each filter removes (subtracts) its complementary color:
+ *
+ *     Cyan    → subtracts Red    → shifts toward Cyan/Teal
+ *     Magenta → subtracts Green  → shifts toward Magenta/Pink
+ *     Yellow  → subtracts Blue   → shifts toward Yellow/Amber
+ *
+ *   Unlike RGB gain, CMY density adjustments:
+ *     - Affect shadows more than highlights
+ *     - Create organic, optical-printer-like color casts
+ *     - Preserve highlight detail better
+ *
+ *   Printer lights: 1 light = 0.025 log exposure per channel.
+ *
+ * Pipeline Position:
+ *   Node 4 of 4-step pipeline. Apply AFTER density simulation.
+ *
+ * Changes v2.0:
+ *   - Uses DuXun-Common.h for unified CMY model
+ *   - Added DEFINE_UI_PARAMS for interactive Resolve sliders
+ *   - Middle gray preservation now optional (toggle in UI)
+ *   - All cross-coupling coefficients centralized in Common.h
+ */
+
+#include "DuXun-Common.h"
+
+/*
+ * Resolve DCTL UI Parameters
+ */
+DEFINE_UI_PARAMS(CYAN,       Cyan,       DCTLUI_SLIDER_FLOAT, 0.0, -1.0, 1.0, 0.01,
+    "Cyan/Red balance (positive = more cyan)")
+DEFINE_UI_PARAMS(MAGENTA,    Magenta,    DCTLUI_SLIDER_FLOAT, 0.0, -1.0, 1.0, 0.01,
+    "Magenta/Green balance")
+DEFINE_UI_PARAMS(YELLOW,     Yellow,     DCTLUI_SLIDER_FLOAT, 0.05, -1.0, 1.0, 0.01,
+    "Yellow/Blue balance (positive = warmer)")
+DEFINE_UI_PARAMS(DENSITY,    Density,    DCTLUI_SLIDER_FLOAT, 0.0, 0.0, 1.0, 0.01,
+    "Overall print density (printer exposure)")
+DEFINE_UI_PARAMS(PRESERVE_MG,Preserve MG, DCTLUI_CHECK_BOX, 1,
+    "Preserve middle gray exposure (on = less exposure shift)")
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y,
+                             float p_R, float p_G, float p_B)
+{
+    float3 rgb = make_float3(p_R, p_G, p_B);
+
+    /* Apply unified CMY subtractive model from shared library */
+    rgb = _film_cmy_apply(rgb, CYAN, MAGENTA, YELLOW, DENSITY,
+                          (int)PRESERVE_MG);
+
+    return _film_clamp3(rgb);
+}

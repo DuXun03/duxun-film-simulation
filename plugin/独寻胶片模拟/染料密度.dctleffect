@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dctleffect>
+  <effect>
+    <name>染料密度</name>
+    <description>独寻胶片模拟 -- Beer-Lambert 染料密度模拟</description>
+    <category>独寻胶片模拟</category>
+    <subcategory>核心管线</subcategory>
+  </effect>
+  <params>
+    <param name="DENSITY"     displayName="染料浓度"       type="float" default="0.85" min="0.0" max="1.5" step="0.01"/>
+    <param name="CHROMA_ROLL" displayName="高光饱和压缩"   type="float" default="0.6"  min="0.0" max="1.0" step="0.01"/>
+    <param name="SHADOW_SAT"  displayName="暗部饱和保持"   type="float" default="0.3"  min="0.0" max="1.0" step="0.01"/>
+    <param name="HUE_SHIFT"   displayName="色相偏移"       type="float" default="0.15" min="0.0" max="0.5" step="0.01"/>
+    <param name="BLEND"       displayName="混合比例"       type="float" default="0.8"  min="0.0" max="1.0" step="0.01"/>
+  </params>
+</dctleffect>

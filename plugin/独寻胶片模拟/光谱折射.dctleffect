@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dctleffect>
+  <effect>
+    <name>光谱折射</name>
+    <description>独寻胶片模拟 -- 6通道光谱折射引擎</description>
+    <category>独寻胶片模拟</category>
+    <subcategory>进阶色彩</subcategory>
+  </effect>
+  <params>
+    <param name="SPR" displayName="光谱分离度" type="float" default="0.5" min="0.0" max="1.0" step="0.01"/>
+    <param name="MIX" displayName="折射混合"   type="float" default="1.0" min="0.0" max="1.0" step="0.01"/>
+  </params>
+</dctleffect>

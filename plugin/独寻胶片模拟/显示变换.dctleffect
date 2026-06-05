@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dctleffect>
+  <effect>
+    <name>显示变换</name>
+    <description>独寻胶片模拟 -- DWG/DI 到 Rec.709/sRGB 显示变换</description>
+    <category>独寻胶片模拟</category>
+    <subcategory>显示变换</subcategory>
+  </effect>
+  <params>
+    <param name="CONTRAST"   displayName="色调对比度" type="float" default="1.0" min="0.5" max="2.0" step="0.01"/>
+    <param name="SHOULDER"   displayName="高光压缩"   type="float" default="1.0" min="0.5" max="2.0" step="0.01"/>
+    <param name="EXPOSURE"   displayName="曝光偏移"   type="float" default="0.0" min="-3.0" max="3.0" step="0.1"/>
+    <param name="GAMMA_MODE" displayName="伽马模式"   type="combo" default="0" values="Rec.709|sRGB"/>
+    <param name="GAMMA"      displayName="自定义伽马"  type="float" default="2.4" min="1.8" max="2.6" step="0.1"/>
+  </params>
+</dctleffect>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dctleffect>
+  <effect>
+    <name>光散射</name>
+    <description>独寻胶片模拟 -- 阴影高光光散射模拟</description>
+    <category>独寻胶片模拟</category>
+    <subcategory>进阶色彩</subcategory>
+  </effect>
+  <params>
+    <param name="SHD_ANGLE" displayName="阴影色相" type="float" default="0.0"  min="0.0" max="360.0" step="1.0"/>
+    <param name="SHD_MIX"   displayName="阴影强度" type="float" default="0.3"  min="0.0" max="1.0"  step="0.01"/>
+    <param name="HL_ANGLE"  displayName="高光色相" type="float" default="200.0" min="0.0" max="360.0" step="1.0"/>
+    <param name="HL_MIX"    displayName="高光强度" type="float" default="0.15" min="0.0" max="1.0"  step="0.01"/>
+    <param name="MIX"       displayName="散射混合" type="float" default="1.0"  min="0.0" max="1.0"  step="0.01"/>
+  </params>
+</dctleffect>

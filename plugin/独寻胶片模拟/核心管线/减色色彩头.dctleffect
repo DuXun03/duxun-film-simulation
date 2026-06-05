@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dctleffect>
+  <effect>
+    <name>减色色彩头</name>
+    <description>独寻胶片模拟 -- CMY减色打印机光源模拟</description>
+    <category>独寻胶片模拟</category>
+    <subcategory>核心管线</subcategory>
+  </effect>
+  <params>
+    <param name="CYAN"        displayName="青/红平衡"     type="float" default="0.0"  min="-1.0" max="1.0" step="0.01"/>
+    <param name="MAGENTA"     displayName="品/绿平衡"     type="float" default="0.0"  min="-1.0" max="1.0" step="0.01"/>
+    <param name="YELLOW"      displayName="黄/蓝平衡"     type="float" default="0.05" min="-1.0" max="1.0" step="0.01"/>
+    <param name="DENSITY"     displayName="整体密度"       type="float" default="0.0"  min="0.0"  max="1.0" step="0.01"/>
+    <param name="PRESERVE_MG" displayName="保持中灰曝光"   type="check" default="1"/>
+  </params>
+</dctleffect>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dctleffect>
+  <effect>
+    <name>色彩矩阵</name>
+    <description>独寻胶片模拟 -- 7 种经典胶片 Stock 的 3x3 RGB 光谱交叉耦合矩阵，模拟乳剂层间色彩串扰</description>
+    <category>独寻胶片模拟</category>
+    <subcategory>核心管线</subcategory>
+    <version>1.0.0</version>
+  </effect>
+  <params>
+    <param name="PRESET"     displayName="胶片 Stock"  type="combo" default="0" values="Kodak 2383|Fuji 3513|Kodak Vision3|Fuji Eterna|Technicolor 3-Strip|Bleach Bypass|直通"/>
+    <param name="STRENGTH"   displayName="矩阵强度"   type="float" default="0.75" min="0.0" max="1.0" step="0.01"/>
+    <param name="LUM_KEEP"   displayName="亮度保持"   type="float" default="0.5"  min="0.0" max="1.0" step="0.01"/>
+  </params>
+</dctleffect>

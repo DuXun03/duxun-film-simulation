@@ -1,0 +1,126 @@
+/*
+ * DuXun-Refraction.dctl
+ * ========================
+ * Spectral Refraction Module for DaVinci Resolve Studio
+ *
+ * Author: film-sim-plugin team
+ * Engine: ported from boomyjee/mycolor (MIT License)
+ * Version: 1.0.0
+ * License: MIT
+ *
+ * Color Science:
+ *   Splits RGB into 6 spectral bands (R-Y-G-C-B-M), applies per-band
+ *   hue rotation and saturation adjustment. This models how light
+ *   refracts through dye layers with wavelength-dependent behavior.
+ *
+ * Pipeline Position:
+ *   Optional advanced module. Insert between Matrix and Density stages
+ *   for spectral color enhancement, or use standalone for creative looks.
+ *
+ * Dependencies:
+ *   DuXun-Mycolor.h (auto-includes DuXun-Common.h)
+ */
+
+#include "DuXun-Mycolor.h"
+
+/*
+ * Stage controls
+ */
+DEFINE_UI_PARAMS(SPR, Spectral Sep, DCTLUI_SLIDER_FLOAT, 0.5, 0.0, 1.0, 0.01,
+    "Spectral separation strength (higher = more color separation)")
+DEFINE_UI_PARAMS(MIX, Refract Mix, DCTLUI_SLIDER_FLOAT, 1.0, 0.0, 1.0, 0.01,
+    "Blend original with refracted result")
+
+/* Red spectral band */
+DEFINE_UI_PARAMS(R_LO_H, Red Lo Hue, DCTLUI_SLIDER_INT, 0, 0, 360, 1,
+    "Red band low hue angle")
+DEFINE_UI_PARAMS(R_LO_S, Red Lo Sat, DCTLUI_SLIDER_INT, 100, 0, 200, 1,
+    "Red band low saturation %")
+DEFINE_UI_PARAMS(R_HI_H, Red Hi Hue, DCTLUI_SLIDER_INT, 0, 0, 360, 1,
+    "Red band high hue angle")
+DEFINE_UI_PARAMS(R_HI_S, Red Hi Sat, DCTLUI_SLIDER_INT, 100, 0, 200, 1,
+    "Red band high saturation %")
+
+/* Yellow spectral band */
+DEFINE_UI_PARAMS(Y_LO_H, Yellow Lo Hue, DCTLUI_SLIDER_INT, 60, 0, 360, 1,
+    "Yellow band low hue angle")
+DEFINE_UI_PARAMS(Y_LO_S, Yellow Lo Sat, DCTLUI_SLIDER_INT, 100, 0, 200, 1,
+    "Yellow band low saturation %")
+DEFINE_UI_PARAMS(Y_HI_H, Yellow Hi Hue, DCTLUI_SLIDER_INT, 60, 0, 360, 1,
+    "Yellow band high hue angle")
+DEFINE_UI_PARAMS(Y_HI_S, Yellow Hi Sat, DCTLUI_SLIDER_INT, 100, 0, 200, 1,
+    "Yellow band high saturation %")
+
+/* Green spectral band */
+DEFINE_UI_PARAMS(G_LO_H, Green Lo Hue, DCTLUI_SLIDER_INT, 120, 0, 360, 1,
+    "Green band low hue angle")
+DEFINE_UI_PARAMS(G_LO_S, Green Lo Sat, DCTLUI_SLIDER_INT, 100, 0, 200, 1,
+    "Green band low saturation %")
+DEFINE_UI_PARAMS(G_HI_H, Green Hi Hue, DCTLUI_SLIDER_INT, 120, 0, 360, 1,
+    "Green band high hue angle")
+DEFINE_UI_PARAMS(G_HI_S, Green Hi Sat, DCTLUI_SLIDER_INT, 100, 0, 200, 1,
+    "Green band high saturation %")
+
+/* Cyan spectral band */
+DEFINE_UI_PARAMS(C_LO_H, Cyan Lo Hue, DCTLUI_SLIDER_INT, 180, 0, 360, 1,
+    "Cyan band low hue angle")
+DEFINE_UI_PARAMS(C_LO_S, Cyan Lo Sat, DCTLUI_SLIDER_INT, 100, 0, 200, 1,
+    "Cyan band low saturation %")
+DEFINE_UI_PARAMS(C_HI_H, Cyan Hi Hue, DCTLUI_SLIDER_INT, 180, 0, 360, 1,
+    "Cyan band high hue angle")
+DEFINE_UI_PARAMS(C_HI_S, Cyan Hi Sat, DCTLUI_SLIDER_INT, 100, 0, 200, 1,
+    "Cyan band high saturation %")
+
+/* Blue spectral band */
+DEFINE_UI_PARAMS(B_LO_H, Blue Lo Hue, DCTLUI_SLIDER_INT, 240, 0, 360, 1,
+    "Blue band low hue angle")
+DEFINE_UI_PARAMS(B_LO_S, Blue Lo Sat, DCTLUI_SLIDER_INT, 100, 0, 200, 1,
+    "Blue band low saturation %")
+DEFINE_UI_PARAMS(B_HI_H, Blue Hi Hue, DCTLUI_SLIDER_INT, 240, 0, 360, 1,
+    "Blue band high hue angle")
+DEFINE_UI_PARAMS(B_HI_S, Blue Hi Sat, DCTLUI_SLIDER_INT, 100, 0, 200, 1,
+    "Blue band high saturation %")
+
+/* Magenta spectral band */
+DEFINE_UI_PARAMS(M_LO_H, Magenta Lo Hue, DCTLUI_SLIDER_INT, 300, 0, 360, 1,
+    "Magenta band low hue angle")
+DEFINE_UI_PARAMS(M_LO_S, Magenta Lo Sat, DCTLUI_SLIDER_INT, 100, 0, 200, 1,
+    "Magenta band low saturation %")
+DEFINE_UI_PARAMS(M_HI_H, Magenta Hi Hue, DCTLUI_SLIDER_INT, 300, 0, 360, 1,
+    "Magenta band high hue angle")
+DEFINE_UI_PARAMS(M_HI_S, Magenta Hi Sat, DCTLUI_SLIDER_INT, 100, 0, 200, 1,
+    "Magenta band high saturation %")
+
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y,
+                             float p_R, float p_G, float p_B)
+{
+    float3 rgb = make_float3(p_R, p_G, p_B);
+
+    /* Compute luminance */
+    float lum = _film_luminance_safe(rgb);
+
+    /* Build 6 spectral band parameter vectors */
+    float4 pR = make_float4((float)R_LO_H, (float)R_LO_S / 100.0f,
+                            (float)R_HI_H, (float)R_HI_S / 100.0f);
+    float4 pY = make_float4((float)Y_LO_H, (float)Y_LO_S / 100.0f,
+                            (float)Y_HI_H, (float)Y_HI_S / 100.0f);
+    float4 pG = make_float4((float)G_LO_H, (float)G_LO_S / 100.0f,
+                            (float)G_HI_H, (float)G_HI_S / 100.0f);
+    float4 pC = make_float4((float)C_LO_H, (float)C_LO_S / 100.0f,
+                            (float)C_HI_H, (float)C_HI_S / 100.0f);
+    float4 pB = make_float4((float)B_LO_H, (float)B_LO_S / 100.0f,
+                            (float)B_HI_H, (float)B_HI_S / 100.0f);
+    float4 pM = make_float4((float)M_LO_H, (float)M_LO_S / 100.0f,
+                            (float)M_HI_H, (float)M_HI_S / 100.0f);
+
+    /* Apply spectral refraction */
+    float3 refracted = _film_refrakt(rgb, pR, pY, pG, pC, pB, pM, lum, SPR);
+
+    /* Blend with original */
+    rgb = _film_lerp(rgb.x, refracted.x, MIX);
+    rgb.y = _film_lerp(rgb.y, refracted.y, MIX);
+    rgb.z = _film_lerp(rgb.z, refracted.z, MIX);
+
+    return _film_clamp3(rgb);
+}
