@@ -2,10 +2,20 @@
 setlocal
 set "PROJECT_ROOT=%~dp0"
 set "WORKSPACE_ROOT=%PROJECT_ROOT%.."
-set "OFX_INC=%WORKSPACE_ROOT%\openfx-sdk\include"
+set "OFX_INC_PRIMARY=%WORKSPACE_ROOT%\openfx-sdk\include"
+set "OFX_INC_WORKTREE=%PROJECT_ROOT%..\..\..\openfx-sdk\include"
+set "OFX_INC=%OFX_INC_PRIMARY%"
 set "SRC=%PROJECT_ROOT%ofx\DuXunFilm"
 set "OUT=%PROJECT_ROOT%build"
 mkdir "%OUT%" 2>nul
+
+if not exist "%OFX_INC%\ofxCore.h" if exist "%OFX_INC_WORKTREE%\ofxCore.h" set "OFX_INC=%OFX_INC_WORKTREE%"
+if not exist "%OFX_INC%\ofxCore.h" (
+    echo OFX_SDK_NOT_FOUND > "%OUT%\build_result.txt"
+    echo CHECKED_PRIMARY=%OFX_INC_PRIMARY% >> "%OUT%\build_result.txt"
+    echo CHECKED_WORKTREE=%OFX_INC_WORKTREE% >> "%OUT%\build_result.txt"
+    exit /b 1
+)
 
 call "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x64 >nul 2>&1
 if errorlevel 1 (

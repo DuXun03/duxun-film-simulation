@@ -3160,6 +3160,80 @@ static void applyBlackAndWhiteStockDefaults(int idx, PresetCustomDefaults& d, fl
     }
 }
 
+static void applyKodakColorNegativeDefaults(int idx, PresetCustomDefaults& d, float speed) {
+    if (presetNameHas(idx, "Ektar 100")) {
+        d.printAmount = 0.34;
+        d.colorDensity = 0.46;
+        d.vibrance = 0.22;
+        d.filmGrainAmount = 0.07;
+        d.filmGrainResolution = 0.92;
+        d.filmGrainChroma = 0.14;
+        d.halationEnabled = ENABLE_SKIP;
+        d.halationAmount = 0.0;
+        d.bloomEnabled = ENABLE_SKIP;
+        d.bloomAmount = 0.0;
+    } else if (presetNameHas(idx, "Gold 200") || presetNameHas(idx, "ColorPlus 200")) {
+        d.printAmount = 0.31;
+        d.colorDensity = 0.42;
+        d.vibrance = 0.14;
+        d.filmGrainAmount = 0.18 + (double)speed * 0.03;
+        d.filmGrainResolution = 0.70;
+        d.filmGrainChroma = 0.20;
+        d.bloomEnabled = ENABLE_SKIP;
+        d.bloomAmount = 0.0;
+    } else if (presetNameHas(idx, "Ultra Max 400")) {
+        d.printAmount = 0.33;
+        d.colorDensity = 0.44;
+        d.vibrance = 0.16;
+        d.filmGrainAmount = 0.26;
+        d.filmGrainResolution = 0.62;
+        d.filmGrainChroma = 0.24;
+        d.halationEnabled = ENABLE_ON;
+        d.halationAmount = 0.018;
+        d.halationThreshold = 0.86;
+        d.halationRadius = 0.24;
+        d.halationWarmth = 0.58;
+        d.bloomEnabled = ENABLE_SKIP;
+        d.bloomAmount = 0.0;
+    } else if (presetNameHas(idx, "Portra 800")) {
+        d.printAmount = 0.25;
+        d.colorDensity = 0.32;
+        d.vibrance = 0.02;
+        d.filmGrainAmount = 0.28;
+        d.filmGrainResolution = 0.58;
+        d.filmGrainChroma = 0.22;
+        d.halationEnabled = ENABLE_ON;
+        d.halationAmount = 0.018;
+        d.halationThreshold = 0.88;
+        d.halationRadius = 0.22;
+        d.halationWarmth = 0.54;
+        d.bloomEnabled = ENABLE_SKIP;
+        d.bloomAmount = 0.0;
+    } else if (presetNameHas(idx, "Portra 400")) {
+        d.printAmount = 0.22;
+        d.colorDensity = 0.30;
+        d.vibrance = 0.0;
+        d.filmGrainAmount = 0.16;
+        d.filmGrainResolution = 0.74;
+        d.filmGrainChroma = 0.16;
+        d.halationEnabled = ENABLE_SKIP;
+        d.halationAmount = 0.0;
+        d.bloomEnabled = ENABLE_SKIP;
+        d.bloomAmount = 0.0;
+    } else if (presetNameHas(idx, "Portra 160")) {
+        d.printAmount = 0.20;
+        d.colorDensity = 0.28;
+        d.vibrance = 0.0;
+        d.filmGrainAmount = 0.10;
+        d.filmGrainResolution = 0.86;
+        d.filmGrainChroma = 0.12;
+        d.halationEnabled = ENABLE_SKIP;
+        d.halationAmount = 0.0;
+        d.bloomEnabled = ENABLE_SKIP;
+        d.bloomAmount = 0.0;
+    }
+}
+
 static void applyHighValueColorStockDefaults(int idx, PresetCustomDefaults& d, float speed) {
     if (presetNameHas(idx, "Pro 800Z")) {
         d.printAmount = 0.22;
@@ -3327,6 +3401,7 @@ static PresetCustomDefaults presetCustomDefaultsForStock(int globalIdx) {
         d.bloomAmount = 0.0;
     }
     if (!bw) {
+        applyKodakColorNegativeDefaults(idx, d, speed);
         applyHighValueColorStockDefaults(idx, d, speed);
     }
     if (d.vignetteAmount > 0.005) {

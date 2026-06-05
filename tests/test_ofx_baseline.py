@@ -20,6 +20,13 @@ class OfxBaselineTests(unittest.TestCase):
             self.assertIn("/source-charset:utf-8", text)
             self.assertIn("/execution-charset:utf-8", text)
 
+    def test_build_plugin_resolves_openfx_sdk_from_project_or_worktree(self):
+        text = read_text("build_plugin.bat")
+        self.assertIn("OFX_INC_PRIMARY", text)
+        self.assertIn("OFX_INC_WORKTREE", text)
+        self.assertIn("..\\..\\..\\openfx-sdk\\include", text)
+        self.assertIn("OFX_SDK_NOT_FOUND", text)
+
     def test_docs_describe_current_ofx_v5_baseline(self):
         readme = read_text("README.md")
         build_guide = read_text("ofx/BUILD_GUIDE.md")

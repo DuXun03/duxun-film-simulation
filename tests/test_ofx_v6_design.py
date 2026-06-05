@@ -567,6 +567,34 @@ class OfxV6DesignTests(unittest.TestCase):
             self.source,
             re.compile(
                 r"if \(!bw\) \{\s*"
+                r"(?:applyKodakColorNegativeDefaults\(idx, d, speed\);\s*)?"
+                r"applyHighValueColorStockDefaults\(idx, d, speed\);\s*"
+                r"\}",
+                re.S,
+            ),
+        )
+
+    def test_kodak_color_negative_presets_have_stock_specific_defaults(self):
+        for token in [
+            "applyKodakColorNegativeDefaults",
+            'presetNameHas(idx, "Ektar 100")',
+            'presetNameHas(idx, "Gold 200")',
+            'presetNameHas(idx, "ColorPlus 200")',
+            'presetNameHas(idx, "Ultra Max 400")',
+            'presetNameHas(idx, "Portra 160")',
+            'presetNameHas(idx, "Portra 400")',
+            'presetNameHas(idx, "Portra 800")',
+            "d.colorDensity = 0.46",
+            "d.filmGrainResolution = 0.92",
+            "d.halationAmount = 0.018",
+            "d.filmGrainAmount = 0.26",
+        ]:
+            self.assertIn(token, self.source)
+        self.assertRegex(
+            self.source,
+            re.compile(
+                r"if \(!bw\) \{\s*"
+                r"applyKodakColorNegativeDefaults\(idx, d, speed\);\s*"
                 r"applyHighValueColorStockDefaults\(idx, d, speed\);\s*"
                 r"\}",
                 re.S,

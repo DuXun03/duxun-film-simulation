@@ -24,13 +24,13 @@ Exact or directly reused stock matrices:
 | Fuji Provia 100F / 400F / 400X | Fuji Provia 100F | `kMatFujiProvia100F` |
 | Fuji Sensia 100 | Fuji Provia 100F near neighbor | `kMatFujiProvia100F` |
 | Fuji Velvia 100 / 50 | Fuji Velvia 50 | `kMatFujiVelvia50` |
-| Kodak ColorPlus 200 | Kodak Gold 200 near neighbor | `kMatKodakGold200` |
-| Kodak Ektar 100 | Kodak Ektar 100 | `kMatKodakEktar100` |
-| Kodak Gold 200 | Kodak Gold 200 | `kMatKodakGold200` |
-| Kodak Portra 160 variants | Kodak Portra 160 | `kMatKodakPortra160` |
-| Kodak Portra 400 variants | Kodak Portra 400 | `kMatKodakPortra400` |
-| Kodak Portra 800 | Kodak Portra 800 | `kMatKodakPortra800` |
-| Kodak Ultra Max 400 | Kodak Ultramax 400 | `kMatKodakUltramax400` |
+| Kodak ColorPlus 200 | Kodak Gold 200 near neighbor plus consumer-negative defaults | `kMatKodakGold200` + `applyKodakColorNegativeDefaults` |
+| Kodak Ektar 100 | Kodak Ektar 100 plus fine-grain saturated negative defaults | `kMatKodakEktar100` + `applyKodakColorNegativeDefaults` |
+| Kodak Gold 200 | Kodak Gold 200 plus consumer-negative defaults | `kMatKodakGold200` + `applyKodakColorNegativeDefaults` |
+| Kodak Portra 160 variants | Kodak Portra 160 plus low-grain portrait-negative defaults | `kMatKodakPortra160` + `applyKodakColorNegativeDefaults` |
+| Kodak Portra 400 variants | Kodak Portra 400 plus medium-grain portrait-negative defaults | `kMatKodakPortra400` + `applyKodakColorNegativeDefaults` |
+| Kodak Portra 800 | Kodak Portra 800 plus high-speed portrait-negative defaults | `kMatKodakPortra800` + `applyKodakColorNegativeDefaults` |
+| Kodak Ultra Max 400 | Kodak Ultramax 400 plus consumer high-speed defaults | `kMatKodakUltramax400` + `applyKodakColorNegativeDefaults` |
 | Kodak Ektachrome 100 G/GX/VS and Elite Chrome 400 | Kodak Ektachrome 100D near neighbor | `kMatKodakEktachrome100D` |
 | Kodak Elite Chrome 400 | Kodak Ektachrome 100D near neighbor plus tuned high-speed slide defaults | `kMatKodakEktachrome100D` + `applyHighValueColorStockDefaults` |
 | Kodachrome 25 / 64 / 200 | Kodachrome 64 | `kMatKodachrome64` |
@@ -44,6 +44,8 @@ Black-and-white presets use stock-specific procedural defaults rather than color
 | Kodak T-Max 3200 / Ilford Delta 3200 / Fuji Neopan 1600 | high-speed coarse-grain defaults |
 | Ilford XP2 | smoother chromogenic B&W defaults |
 
+Kodak color-negative presets now combine the stock matrix with procedural defaults for print amount, color density, vibrance, grain resolution/chroma, and subtle or disabled halation. The matrix sets the broad dye-response direction; `applyKodakColorNegativeDefaults` makes Portra, Ektar, Gold/ColorPlus, and Ultramax behave differently in the user-facing controls.
+
 ## Unresolved calibration
 
 These presets still need visual A/B calibration against reference material or better source data:
@@ -51,6 +53,7 @@ These presets still need visual A/B calibration against reference material or be
 - Fuji Pro 800Z, now using a Pro 400H near-neighbor matrix and high-speed color-negative defaults
 - Fuji Astia 100F, now using a Provia near-neighbor matrix and soft-slide defaults
 - Fuji Fortia SP 50, now using a Velvia near-neighbor matrix and high-saturation slide defaults
+- Kodak Portra, Ektar, Gold, ColorPlus, and Ultramax, now using stock matrices plus differentiated color-negative defaults
 - Kodak Elite Chrome 400, now using an Ektachrome near-neighbor matrix and high-speed slide defaults
 - All exact negative/print pairing behavior beyond the current embedded matrix plus print-stock model
 
