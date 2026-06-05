@@ -6,10 +6,10 @@ GPU expansion is paused. The plugin keeps the existing CUDA implementation that 
 
 HDR support is removed from the plugin. The previous Rec.2100 PQ/HLG mapping produced incorrect image behavior, and a bad color-management feature is worse for a film-look product than no HDR feature.
 
-The no-HDR build was rebuilt and installed on 2026-06-05. The latest installed build also includes black-and-white defaults, resource-backed matrix mapping refinements, tuned high-value Fuji/Kodak defaults, and differentiated Kodak color-negative defaults. Build and installed OFX SHA256:
+The no-HDR build was rebuilt and installed on 2026-06-06. The latest installed build also includes black-and-white defaults, resource-backed matrix mapping refinements, tuned high-value Fuji/Kodak defaults, differentiated Kodak color-negative defaults, and Fuji Superia / Agfa Vista / CineStill stock-specific defaults. Build and installed OFX SHA256:
 
 ```text
-63895497913AB771331997953CCDFF45E19DD603A8E6FBABA15A0CD3A1E76290
+1C7609A81AB283167071E949D4C4438EB493DF5E1CCD1D20A6ED9B482350870D
 ```
 
 ## Current acceleration baseline

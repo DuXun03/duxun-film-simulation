@@ -10,15 +10,15 @@ Exact or directly reused stock matrices:
 
 | OFX preset | Resource basis | Implementation |
 | --- | --- | --- |
-| Agfa Vista 100 / 200 / 400 | Agfa Vista 100 | `kMatAgfaVista100` |
-| CineStill 50D | Kodak Vision3 50D 5203 style matrix | `kMatCineStill50D` |
-| CineStill 800T | Kodak Vision3 500T 5219 style matrix | `kMatCineStill800T` |
+| Agfa Vista 100 / 200 / 400 | Agfa Vista 100 plus consumer daylight-negative defaults | `kMatAgfaVista100` + `applyFujiAgfaCineStillDefaults` |
+| CineStill 50D | Kodak Vision3 50D 5203 style matrix plus no-remjet daylight defaults | `kMatCineStill50D` + `applyFujiAgfaCineStillDefaults` |
+| CineStill 800T | Kodak Vision3 500T 5219 style matrix plus no-remjet tungsten defaults | `kMatCineStill800T` + `applyFujiAgfaCineStillDefaults` |
 | Fuji Pro 160C | Fuji Pro 160C | `kMatFujiPro160C` |
 | Fuji Pro 400H | Fuji Pro 400H | `kMatFujiPro400H` |
 | Fuji Pro 800Z | Fuji Pro 400H near neighbor plus tuned high-speed color-negative defaults | `kMatFujiPro400H` + `applyHighValueColorStockDefaults` |
-| Fuji Superia 100 / 400 / 800 | Fuji Superia X-Tra 400 family | `kMatFujiSuperia` |
-| Fuji Superia 200 | Fuji C200 | `kMatFujiC200` |
-| Fuji Superia 1600 / Superia HG 1600 | Fuji Natura 1600 near neighbor | `kMatFujiNatura1600` |
+| Fuji Superia 100 / 400 / 800 | Fuji Superia X-Tra 400 family plus consumer-negative defaults | `kMatFujiSuperia` + `applyFujiAgfaCineStillDefaults` |
+| Fuji Superia 200 | Fuji C200 plus consumer-negative defaults | `kMatFujiC200` + `applyFujiAgfaCineStillDefaults` |
+| Fuji Superia 1600 / Superia HG 1600 | Fuji Natura 1600 near neighbor plus high-speed consumer-negative defaults | `kMatFujiNatura1600` + `applyFujiAgfaCineStillDefaults` |
 | Fuji Astia 100F | Fuji Provia 100F near neighbor plus tuned soft-slide defaults | `kMatFujiProvia100F` + `applyHighValueColorStockDefaults` |
 | Fuji Fortia SP 50 | Fuji Velvia 50 near neighbor plus tuned high-saturation slide defaults | `kMatFujiVelvia50` + `applyHighValueColorStockDefaults` |
 | Fuji Provia 100F / 400F / 400X | Fuji Provia 100F | `kMatFujiProvia100F` |
@@ -46,10 +46,13 @@ Black-and-white presets use stock-specific procedural defaults rather than color
 
 Kodak color-negative presets now combine the stock matrix with procedural defaults for print amount, color density, vibrance, grain resolution/chroma, and subtle or disabled halation. The matrix sets the broad dye-response direction; `applyKodakColorNegativeDefaults` makes Portra, Ektar, Gold/ColorPlus, and Ultramax behave differently in the user-facing controls.
 
+Fuji Superia, Agfa Vista, and CineStill presets now use `applyFujiAgfaCineStillDefaults`. Superia gets consumer-negative color and grain scaling, Agfa Vista gets a restrained daylight C-41 response, and CineStill 50D/800T get no-remjet halation defaults instead of sharing generic negative behavior.
+
 ## Unresolved calibration
 
 These presets still need visual A/B calibration against reference material or better source data:
 
+- Fuji Superia, Agfa Vista, and CineStill, now using differentiated defaults but still requiring Resolve A/B exports
 - Fuji Pro 800Z, now using a Pro 400H near-neighbor matrix and high-speed color-negative defaults
 - Fuji Astia 100F, now using a Provia near-neighbor matrix and soft-slide defaults
 - Fuji Fortia SP 50, now using a Velvia near-neighbor matrix and high-saturation slide defaults

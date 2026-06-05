@@ -567,6 +567,7 @@ class OfxV6DesignTests(unittest.TestCase):
             self.source,
             re.compile(
                 r"if \(!bw\) \{\s*"
+                r"(?:applyFujiAgfaCineStillDefaults\(idx, d, speed\);\s*)?"
                 r"(?:applyKodakColorNegativeDefaults\(idx, d, speed\);\s*)?"
                 r"applyHighValueColorStockDefaults\(idx, d, speed\);\s*"
                 r"\}",
@@ -594,6 +595,35 @@ class OfxV6DesignTests(unittest.TestCase):
             self.source,
             re.compile(
                 r"if \(!bw\) \{\s*"
+                r"applyFujiAgfaCineStillDefaults\(idx, d, speed\);\s*"
+                r"applyKodakColorNegativeDefaults\(idx, d, speed\);\s*"
+                r"applyHighValueColorStockDefaults\(idx, d, speed\);\s*"
+                r"\}",
+                re.S,
+            ),
+        )
+
+    def test_fuji_agfa_cinestill_presets_have_stock_specific_defaults(self):
+        for token in [
+            "applyFujiAgfaCineStillDefaults",
+            'presetNameHas(idx, "Superia 1600")',
+            'presetNameHas(idx, "Superia HG 1600")',
+            'presetNameHas(idx, "Superia")',
+            'presetNameHas(idx, "Agfa Vista")',
+            'presetNameHas(idx, "CineStill 800T")',
+            'presetNameHas(idx, "CineStill 50D")',
+            "d.filmGrainAmount = 0.34",
+            "d.filmGrainResolution = 0.54",
+            "d.colorDensity = 0.37",
+            "d.halationAmount = 0.16",
+            "d.halationAmount = 0.08",
+        ]:
+            self.assertIn(token, self.source)
+        self.assertRegex(
+            self.source,
+            re.compile(
+                r"if \(!bw\) \{\s*"
+                r"applyFujiAgfaCineStillDefaults\(idx, d, speed\);\s*"
                 r"applyKodakColorNegativeDefaults\(idx, d, speed\);\s*"
                 r"applyHighValueColorStockDefaults\(idx, d, speed\);\s*"
                 r"\}",

@@ -3160,6 +3160,87 @@ static void applyBlackAndWhiteStockDefaults(int idx, PresetCustomDefaults& d, fl
     }
 }
 
+static void applyFujiAgfaCineStillDefaults(int idx, PresetCustomDefaults& d, float speed) {
+    if (presetNameHas(idx, "CineStill 800T")) {
+        d.printAmount = 0.26;
+        d.colorDensity = 0.30;
+        d.vibrance = 0.0;
+        d.filmGrainAmount = 0.30;
+        d.filmGrainResolution = 0.55;
+        d.filmGrainChroma = 0.32;
+        d.halationEnabled = ENABLE_ON;
+        d.halationAmount = 0.16;
+        d.halationThreshold = 0.83;
+        d.halationRadius = 0.50;
+        d.halationWarmth = 0.82;
+        d.halationLocal = 0.42;
+        d.halationGlobal = 0.07;
+        d.halationHue = 0.40;
+        d.halationBlueComp = 0.66;
+        d.halationImpact = 0.30;
+        d.halationDefringe = 0.34;
+        d.bloomEnabled = ENABLE_SKIP;
+        d.bloomAmount = 0.0;
+        d.bloomThreshold = 0.90;
+        d.bloomRegion = 0.80;
+        d.bloomRadius = 0.30;
+    } else if (presetNameHas(idx, "CineStill 50D")) {
+        d.printAmount = 0.22;
+        d.colorDensity = 0.32;
+        d.vibrance = 0.02;
+        d.filmGrainAmount = 0.08;
+        d.filmGrainResolution = 0.88;
+        d.filmGrainChroma = 0.16;
+        d.halationEnabled = ENABLE_ON;
+        d.halationAmount = 0.08;
+        d.halationThreshold = 0.86;
+        d.halationRadius = 0.32;
+        d.halationWarmth = 0.76;
+        d.halationLocal = 0.30;
+        d.halationGlobal = 0.04;
+        d.halationHue = 0.34;
+        d.halationBlueComp = 0.50;
+        d.halationImpact = 0.20;
+        d.halationDefringe = 0.28;
+        d.bloomEnabled = ENABLE_SKIP;
+        d.bloomAmount = 0.0;
+    } else if (presetNameHas(idx, "Superia 1600") || presetNameHas(idx, "Superia HG 1600")) {
+        d.printAmount = 0.34;
+        d.colorDensity = 0.44;
+        d.vibrance = 0.18;
+        d.filmGrainAmount = 0.34;
+        d.filmGrainResolution = 0.54;
+        d.filmGrainChroma = 0.30;
+        d.halationEnabled = ENABLE_ON;
+        d.halationAmount = 0.018;
+        d.halationThreshold = 0.86;
+        d.halationRadius = 0.24;
+        d.halationWarmth = 0.50;
+        d.bloomEnabled = ENABLE_SKIP;
+        d.bloomAmount = 0.0;
+    } else if (presetNameHas(idx, "Superia")) {
+        d.printAmount = 0.30;
+        d.colorDensity = 0.40;
+        d.vibrance = 0.14;
+        d.filmGrainAmount = 0.13 + (double)speed * 0.10;
+        d.filmGrainResolution = clampf(0.82f - speed * 0.22f, 0.58f, 0.84f);
+        d.filmGrainChroma = 0.22;
+        d.bloomEnabled = ENABLE_SKIP;
+        d.bloomAmount = 0.0;
+    } else if (presetNameHas(idx, "Agfa Vista")) {
+        d.printAmount = 0.28;
+        d.colorDensity = 0.37;
+        d.vibrance = 0.08;
+        d.filmGrainAmount = 0.11 + (double)speed * 0.08;
+        d.filmGrainResolution = clampf(0.84f - speed * 0.18f, 0.64f, 0.86f);
+        d.filmGrainChroma = 0.18;
+        d.halationEnabled = ENABLE_SKIP;
+        d.halationAmount = 0.0;
+        d.bloomEnabled = ENABLE_SKIP;
+        d.bloomAmount = 0.0;
+    }
+}
+
 static void applyKodakColorNegativeDefaults(int idx, PresetCustomDefaults& d, float speed) {
     if (presetNameHas(idx, "Ektar 100")) {
         d.printAmount = 0.34;
@@ -3368,39 +3449,8 @@ static PresetCustomDefaults presetCustomDefaultsForStock(int globalIdx) {
         d.bloomAmount = 0.0;
         d.bloomEnabled = ENABLE_SKIP;
     }
-    if (presetNameHas(idx, "CineStill 800T")) {
-        d.halationEnabled = ENABLE_ON;
-        d.halationAmount = 0.18;
-        d.halationThreshold = 0.82;
-        d.halationRadius = 0.55;
-        d.halationWarmth = 0.82;
-        d.halationLocal = 0.42;
-        d.halationGlobal = 0.08;
-        d.halationHue = 0.40;
-        d.halationBlueComp = 0.66;
-        d.halationImpact = 0.32;
-        d.halationDefringe = 0.34;
-        d.bloomEnabled = ENABLE_SKIP;
-        d.bloomAmount = 0.0;
-        d.bloomThreshold = 0.90;
-        d.bloomRegion = 0.80;
-        d.bloomRadius = 0.30;
-    } else if (presetNameHas(idx, "CineStill 50D")) {
-        d.halationEnabled = ENABLE_ON;
-        d.halationAmount = 0.10;
-        d.halationThreshold = 0.84;
-        d.halationRadius = 0.38;
-        d.halationWarmth = 0.72;
-        d.halationLocal = 0.32;
-        d.halationGlobal = 0.05;
-        d.halationHue = 0.34;
-        d.halationBlueComp = 0.52;
-        d.halationImpact = 0.22;
-        d.halationDefringe = 0.28;
-        d.bloomEnabled = ENABLE_SKIP;
-        d.bloomAmount = 0.0;
-    }
     if (!bw) {
+        applyFujiAgfaCineStillDefaults(idx, d, speed);
         applyKodakColorNegativeDefaults(idx, d, speed);
         applyHighValueColorStockDefaults(idx, d, speed);
     }

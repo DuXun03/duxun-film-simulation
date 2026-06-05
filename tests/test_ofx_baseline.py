@@ -27,6 +27,20 @@ class OfxBaselineTests(unittest.TestCase):
         self.assertIn("..\\..\\..\\openfx-sdk\\include", text)
         self.assertIn("OFX_SDK_NOT_FOUND", text)
 
+    def test_resolve_visual_ab_plan_is_documented_and_scripted(self):
+        script = read_text("scripts/resolve_visual_ab_plan.py")
+        doc = read_text("docs/resolve-visual-ab-2026-06-06.md")
+        for token in [
+            "Fuji Superia",
+            "Agfa Vista",
+            "CineStill 800T",
+            "CineStill 50D",
+            "Identity",
+            "do not automate activation",
+        ]:
+            self.assertIn(token, script)
+            self.assertIn(token, doc)
+
     def test_docs_describe_current_ofx_v5_baseline(self):
         readme = read_text("README.md")
         build_guide = read_text("ofx/BUILD_GUIDE.md")
