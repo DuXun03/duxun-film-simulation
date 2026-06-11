@@ -55,6 +55,21 @@ class OfxBaselineTests(unittest.TestCase):
         self.assertNotIn("65", build_guide)
         self.assertNotIn("DCTL 插件 - v2.0", readme)
 
+    def test_install_script_uses_standard_ofx_v5_bundle(self):
+        script = read_text("scripts/install.bat")
+        for token in [
+            "OpenFX v5.0",
+            "DuXunFilmSim.ofx.bundle",
+            "Contents\\Win64",
+            "build\\DuXunFilmSim.ofx",
+            "certutil -hashfile",
+            "Build hash:",
+            "Installed hash:",
+        ]:
+            self.assertIn(token, script)
+        self.assertNotIn("独立胶片模拟_IDT", script)
+        self.assertNotIn("DaVinci Resolve Plugin Package", script)
+
     def test_ofx_source_metadata_matches_documented_baseline(self):
         source = read_text("ofx/DuXunFilm/DuXunFilmSim.cpp")
         exports = read_text("ofx/DuXunFilm/DuXunFilmSim.def")

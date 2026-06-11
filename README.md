@@ -15,6 +15,7 @@ DaVinci Resolve OpenFX 胶片模拟插件 - v5.0 baseline.
 - 当前内置预设: 54 个 t3mujinpack 胶片预设
 - 核心源码: `ofx/DuXunFilm/DuXunFilmSim.cpp`
 - 当前构建产物: `build/DuXunFilmSim.ofx`
+- 当前安装路径: `C:\Program Files\Common Files\OFX\Plugins\DuXunFilmSim.ofx.bundle\Contents\Win64\DuXunFilmSim.ofx`
 
 ## 项目结构
 
@@ -33,6 +34,7 @@ film-sim-plugin/
 │       └── DuXunFilmSim.def
 ├── scripts/
 │   ├── compile_all.bat
+│   ├── install.bat
 │   ├── test_ofx_mock.py
 │   └── generate_film_luts.py
 ├── presets/
@@ -83,11 +85,19 @@ scripts\compile_all.bat
 
 ## 安装到 Resolve
 
-将构建产物复制到 Windows OFX 插件目录：
+OpenFX v5.0 是当前主线和交付目标。安装时必须使用标准 OFX bundle 目录，不能把 `.ofx` 直接复制到 `Plugins` 根目录。
 
 ```bat
-copy build\DuXunFilmSim.ofx "C:\Program Files\Common Files\OFX\Plugins\DuXunFilmSim.ofx"
+scripts\install.bat
 ```
+
+安装脚本会创建目录并复制二进制：
+
+```text
+C:\Program Files\Common Files\OFX\Plugins\DuXunFilmSim.ofx.bundle\Contents\Win64\DuXunFilmSim.ofx
+```
+
+脚本结束时会输出 `build\DuXunFilmSim.ofx` 与已安装文件的 SHA256。两个 hash 必须一致。
 
 然后重启 DaVinci Resolve。插件应出现在 Effects Library 的 `DuXun` 分组下，名称为 `DuXun Film Simulation`。
 
@@ -95,28 +105,22 @@ copy build\DuXunFilmSim.ofx "C:\Program Files\Common Files\OFX\Plugins\DuXunFilm
 
 ## 验证
 
-运行基线检查：
+运行完整单元测试：
 
 ```bat
-python tests\test_ofx_baseline.py
-```
-
-期望结果：
-
-```text
-Ran 3 tests
-OK
+python -m unittest discover -s tests -q
 ```
 
 该检查会确认：
 
 - 构建脚本不再包含旧 WorkBuddy 绝对路径
 - 文档描述的是 OpenFX v5.0 主线
+- 安装脚本使用标准 OFX bundle 路径并输出 build/installed hash
 - 核心源码元数据仍为 `com.duxun.filmsim`、`DuXun Film Simulation`、v5.0、54 个预设
 
 ## 重要历史记录
 
-项目曾从 DCTL 原型推进到 OpenFX 插件。`docs/code-audit-2026-05-28.md` 主要对应早期 DCTL 架构，不能代表当前 v5.0 OpenFX 代码状态。
+项目曾从 DCTL 原型推进到 OpenFX 插件。旧 DCTL/LUT package 安装方式不是当前交付主线；`scripts\install.bat` 现在只安装 OpenFX v5.0 bundle。`docs/code-audit-2026-05-28.md` 主要对应早期 DCTL 架构，不能代表当前 v5.0 OpenFX 代码状态。
 
 已解决的关键 OpenFX 加载问题：
 
@@ -131,7 +135,7 @@ OK
 
 当前推荐先保持 v5.0 baseline 稳定，再进入功能扩展：
 
-1. 将 54 个内置参数预设和 `presets/film_stocks/` LUT 资源建立清晰映射。
-2. 增加一个安装脚本，把 `.ofx` 放入 OFX 插件目录。
-3. 在 Resolve 内做视觉 A/B 验证，记录每个品牌预设的明显问题。
-4. 再考虑把 DCTL/LUT 资源集成进 OpenFX 资源包。
+1. 固化 Resolve 视觉 A/B 证据，继续补 close-up skin、bright sky 和 tungsten practical 场景。
+2. 保持 OpenFX v5.0 bundle 安装脚本和 hash 校验稳定。
+3. 在 preset differentiation 稳定后，再推进 installer/licensing/trial/buyout 流程。
+4. 后续如需集成 DCTL/LUT 资源，先设计资源包和 runtime 加载方案；这不是当前交付主线。

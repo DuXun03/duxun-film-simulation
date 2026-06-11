@@ -17,15 +17,10 @@ C:\Users\LI\Documents\调色插件开发\2026-05-28-19-53-09\openfx-sdk
 ## 2. 检查基线
 
 ```bat
-python tests\test_ofx_baseline.py
+python -m unittest discover -s tests -q
 ```
 
-通过时会显示：
-
-```text
-Ran 3 tests
-OK
-```
+通过时会显示 `OK`。
 
 ## 3. 编译 OpenFX 插件
 
@@ -48,8 +43,16 @@ build\DuXunFilmSim.ofx
 ## 4. 安装到 DaVinci Resolve
 
 ```bat
-copy build\DuXunFilmSim.ofx "C:\Program Files\Common Files\OFX\Plugins\DuXunFilmSim.ofx"
+scripts\install.bat
 ```
+
+当前交付主线是 OpenFX v5.0。安装脚本会创建标准 OFX bundle 目录，并把构建产物复制到：
+
+```text
+C:\Program Files\Common Files\OFX\Plugins\DuXunFilmSim.ofx.bundle\Contents\Win64\DuXunFilmSim.ofx
+```
+
+脚本会输出 build hash 和 installed hash，两个 SHA256 必须一致。不要再把 `build\DuXunFilmSim.ofx` 直接复制到 `Plugins` 根目录。
 
 重启 DaVinci Resolve 后，在 Effects Library 中查找：
 
@@ -66,4 +69,5 @@ DuXun -> DuXun Film Simulation
 ## 6. 当前不要混淆的两条线
 
 - OpenFX v5.0 是当前主线和交付目标。
+- 旧 DCTL/LUT package 安装方式不是当前交付主线。
 - `dctl/`、`plugin/`、`presets/` 是算法和资源素材，后续可继续整合，但不是当前最小交付路径。

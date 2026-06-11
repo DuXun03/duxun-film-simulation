@@ -615,7 +615,7 @@ class OfxV6DesignTests(unittest.TestCase):
             "d.filmGrainAmount = 0.34",
             "d.filmGrainResolution = 0.54",
             "d.colorDensity = 0.37",
-            "d.halationAmount = 0.16",
+            "d.halationAmount = 0.22",
             "d.halationAmount = 0.08",
         ]:
             self.assertIn(token, self.source)

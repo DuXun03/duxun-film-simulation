@@ -3162,22 +3162,22 @@ static void applyBlackAndWhiteStockDefaults(int idx, PresetCustomDefaults& d, fl
 
 static void applyFujiAgfaCineStillDefaults(int idx, PresetCustomDefaults& d, float speed) {
     if (presetNameHas(idx, "CineStill 800T")) {
-        d.printAmount = 0.26;
+        d.printAmount = 0.24;
         d.colorDensity = 0.30;
         d.vibrance = 0.0;
         d.filmGrainAmount = 0.30;
         d.filmGrainResolution = 0.55;
         d.filmGrainChroma = 0.32;
         d.halationEnabled = ENABLE_ON;
-        d.halationAmount = 0.16;
-        d.halationThreshold = 0.83;
-        d.halationRadius = 0.50;
+        d.halationAmount = 0.22;
+        d.halationThreshold = 0.80;
+        d.halationRadius = 0.52;
         d.halationWarmth = 0.82;
-        d.halationLocal = 0.42;
-        d.halationGlobal = 0.07;
+        d.halationLocal = 0.50;
+        d.halationGlobal = 0.06;
         d.halationHue = 0.40;
         d.halationBlueComp = 0.66;
-        d.halationImpact = 0.30;
+        d.halationImpact = 0.36;
         d.halationDefringe = 0.34;
         d.bloomEnabled = ENABLE_SKIP;
         d.bloomAmount = 0.0;
@@ -3228,7 +3228,7 @@ static void applyFujiAgfaCineStillDefaults(int idx, PresetCustomDefaults& d, flo
         d.bloomEnabled = ENABLE_SKIP;
         d.bloomAmount = 0.0;
     } else if (presetNameHas(idx, "Agfa Vista")) {
-        d.printAmount = 0.28;
+        d.printAmount = 0.18;
         d.colorDensity = 0.37;
         d.vibrance = 0.08;
         d.filmGrainAmount = 0.11 + (double)speed * 0.08;
