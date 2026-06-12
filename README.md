@@ -127,6 +127,16 @@ C:\Program Files\Common Files\OFX\Plugins\DuXunFilmSim.ofx.bundle\Contents\Win64
 docs/release-preflight-2026-06-12.md
 ```
 
+License MVP beta 交付包已经单独收口，不覆盖无授权 beta 包：
+
+```text
+DuXunFilmSim-OFX-v5.0-license-mvp.zip
+docs/licensing-mvp-qa-2026-06-12.md
+docs/license-key-custody-and-issuance-2026-06-13.md
+```
+
+用户侧授权流程只需要生成 `activation-request.json`、接收 `license.json`、运行 `scripts\install_license.bat`，然后在 Resolve 中点击 `Reload License` 或重启 Resolve。签发端 private key custody、buyout 签发、换机重签和拒签策略只记录在内部 docs 中，不进入用户分发包。
+
 当前开发包安装/重装仍使用：
 
 ```bat
@@ -175,10 +185,9 @@ python -m unittest discover -s tests -q
 
 ## 下一步
 
-当前推荐先把 v5.0 visual baseline 和安装交付稳定下来，再进入功能扩展：
+当前推荐先把 v5.0 visual baseline、无授权 beta 包和 License MVP beta 包都保持冻结，再进入功能扩展：
 
-1. 按 `docs/release-preflight-2026-06-12.md` 整理 release package 目录和 `SHA256SUMS.txt`。
-2. 用 `scripts\install.bat` / `scripts\uninstall.bat` 验证安装、重装、卸载闭环。
-3. 把最小用户文档收敛为发布包内的 `README.md` / `QUICKSTART.md`。
-4. Trial、activation、buyout 只做方案草案；当前不要实现授权逻辑。
-5. 后续如需集成 DCTL/LUT 资源，先设计资源包和 runtime 加载方案；这不是当前交付主线。
+1. 发售前复核 `docs/license-key-custody-and-issuance-2026-06-13.md`，确认 actual production private key 的备份、访问控制和签发 ledger。
+2. 用 `DuXunFilmSim-OFX-v5.0-license-mvp.zip.sha256` 校验用户包未被改动。
+3. 保持 package README / release notes 为用户侧流程，不加入签发端 private key 细节。
+4. 后续如需集成 DCTL/LUT 资源，先设计资源包和 runtime 加载方案；这不是当前交付主线。

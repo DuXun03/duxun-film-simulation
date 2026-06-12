@@ -129,10 +129,18 @@ C:\ProgramData\DuXun\FilmSim\logs\license.log
 
 本轮生成了本地 MVP ECDSA P-256 signing key。只有 public key 被写入源码；private key 不在 git 仓库内。正式销售前需要将 private key 移到安全保管位置，确认备份、访问控制和后续换机重签流程。
 
+生产私钥托管和手工签发流程已在后续 handoff 中定义，并完成一次 dedicated `production-mvp` test key dry run：
+
+```text
+docs/license-key-custody-and-issuance-2026-06-13.md
+```
+
+该 dry run 使用 `--public-key` / `--machine-hash` override 验证签发流程，不替换已完成 License MVP package 中的 embedded public key，也不修改 `DuXunFilmSim-OFX-v5.0-license-mvp.zip`。
+
 ## Remaining Risks
 
 - 当前授权是 MVP，本轮没有实现联网激活、GUI installer、license server 或自动换机。
 - ProgramData ACL 仍依赖现有系统权限，后续 installer 需要统一设置。
 - Resolve smoke 是单机手工验证，不是自动化 UI 回归。
 - Watermark 是轻量 overlay，足够 MVP 误用提醒，但不是强 DRM。
-- private key custody 是发售前最高优先级风险；丢失 private key 会导致无法签发与当前 public key 匹配的新 license。
+- private key custody 已有 MVP 流程文档；正式销售前仍需把实际 production key 移入受控保管位置并完成备份演练。丢失 private key 会导致无法签发与当前 public key 匹配的新 license。
