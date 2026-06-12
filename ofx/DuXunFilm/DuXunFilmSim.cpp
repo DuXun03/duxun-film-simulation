@@ -1125,9 +1125,16 @@ static bool buildGlowBuffer(GlowBuffer& gb, const float* src, int strideFloats, 
                 w = w * w * (3.0f - 2.0f * w);
             }
             int i = (gy * gb.w + gx) * 3;
-            gb.data[i] = pr * w;
-            gb.data[i + 1] = pg * w;
-            gb.data[i + 2] = pb * w;
+            if (glowKind == GLOW_HALATION) {
+                float redLeak = fmaxf(pr, lum * 1.12f) * w;
+                gb.data[i] = redLeak;
+                gb.data[i + 1] = redLeak * 0.30f;
+                gb.data[i + 2] = redLeak * 0.025f;
+            } else {
+                gb.data[i] = pr * w;
+                gb.data[i + 1] = pg * w;
+                gb.data[i + 2] = pb * w;
+            }
         }
     }
 
@@ -1188,13 +1195,22 @@ static inline void applyCineStillHalation(float amount, float warmth, float br, 
     float a = clampf(amount, 0.0f, 2.0f);
     float warm = clampf(warmth, 0.0f, 1.0f);
     float lum = 0.2126f * br + 0.7152f * bg + 0.0722f * bb;
-    float redKey = fmaxf(br * 1.15f, lum * 0.84f);
-    float mix = clampf(a * 0.42f, 0.0f, 0.85f);
+    float redKey = fmaxf(br * 1.28f, lum * 0.92f);
+    float mix = clampf(a * 0.52f, 0.0f, 0.85f);
     float veil = clampf(redKey * mix, 0.0f, 0.95f);
+    float baseLum = clampf(0.2126f * r + 0.7152f * g + 0.0722f * b, 0.0f, 1.4f);
+    float ringBias = 1.15f - 0.75f * smoothstepf(0.72f, 1.10f, baseLum);
+    ringBias = clampf(ringBias, 0.32f, 1.15f);
 
-    r += veil * (0.72f + 0.38f * warm);
-    g += veil * (0.10f + 0.24f * warm);
-    b += veil * (0.02f + 0.08f * (1.0f - warm));
+    r += veil * ringBias * (0.96f + 0.48f * warm);
+    g += veil * ringBias * (0.035f + 0.135f * warm);
+    b += veil * ringBias * (0.003f + 0.020f * (1.0f - warm));
+
+    float haloTint = clampf(veil * ringBias * (0.48f + 0.38f * warm), 0.0f, 0.72f);
+    float orangeG = r * (0.24f + 0.10f * (1.0f - warm));
+    float redB = r * (0.018f + 0.045f * (1.0f - warm));
+    g = lerpf(g, fminf(g, orangeG), haloTint);
+    b = lerpf(b, fminf(b, redB), haloTint);
 }
 
 static inline void applyHalationControls(float amount, float local, float global, float hue,
@@ -1208,9 +1224,12 @@ static inline void applyHalationControls(float amount, float local, float global
     float glob = clampf(global, 0.0f, 1.0f);
     float h = clampf(hue, 0.0f, 1.0f);
     float mix = a * (0.030f + 0.120f * clampf(impact, 0.0f, 1.0f)) * hi;
-    r += mix * (0.62f + 0.28f * loc + 0.10f * glob);
-    g += mix * (0.10f + 0.14f * h);
-    b += mix * (0.03f + 0.10f * (1.0f - h)) * (1.0f - 0.70f * clampf(blueComp, 0.0f, 1.0f));
+    r += mix * (0.74f + 0.34f * loc + 0.08f * glob);
+    g += mix * (0.065f + 0.115f * h);
+    b += mix * (0.010f + 0.070f * (1.0f - h)) * (1.0f - 0.78f * clampf(blueComp, 0.0f, 1.0f));
+    float chromaBias = clampf(mix * (2.20f + 1.80f * clampf(impact, 0.0f, 1.0f)), 0.0f, 0.45f);
+    g = lerpf(g, fminf(g, r * (0.26f + 0.16f * (1.0f - h))), chromaBias);
+    b = lerpf(b, fminf(b, r * (0.020f + 0.065f * (1.0f - h))), chromaBias);
     float fringe = clampf(defringe, 0.0f, 1.0f) * hi * a;
     b = lerpf(b, fminf(b, lum * 0.92f + r * 0.08f), fringe);
 }
@@ -1914,9 +1933,16 @@ extern "C" __global__ void cudaHighlightMaskKernel(
         w = w * w * (3.0f - 2.0f * w);
     }
     int i = (y * glowWidth + x) * 3;
-    mask[i + 0] = pr * w;
-    mask[i + 1] = pg * w;
-    mask[i + 2] = pb * w;
+    if (glowKind == 0) {
+        float redLeak = fmaxf(pr, lum * 1.12f) * w;
+        mask[i + 0] = redLeak;
+        mask[i + 1] = redLeak * 0.30f;
+        mask[i + 2] = redLeak * 0.025f;
+    } else {
+        mask[i + 0] = pr * w;
+        mask[i + 1] = pg * w;
+        mask[i + 2] = pb * w;
+    }
 }
 
 extern "C" __global__ void cudaDownsampleKernel(const float* src, float* dst, int width, int height) {
@@ -1983,6 +2009,8 @@ extern "C" __global__ void cudaCompositeGlowKernel(
     float* dst, const float* bloomGlow, const float* halationGlow,
     int width, int height, int dstStrideFloats, int glowWidth, int glowHeight,
     int enableBloom, int enableHalation, float fH, float fHalationWarmth,
+    float fHalationLocal, float fHalationGlobal, float fHalationHue,
+    float fHalationBlueComp, float fHalationImpact, float fHalationDefringe,
     float fBloom, float fBloomRadius, float fBloomDetail, float fBloomSaveLights,
     float fBloomDefringe, int showBloomMask)
 {
@@ -2024,10 +2052,35 @@ extern "C" __global__ void cudaCompositeGlowKernel(
     if (enableHalation && fH > 0.01f) {
         float warm = duxunClamp(fHalationWarmth, 0.0f, 1.0f);
         float lum = duxunClamp(0.2126f * halR + 0.7152f * halG + 0.0722f * halB, 0.0f, 1.4f);
-        float mix = duxunClamp(fH * 0.18f * lum, 0.0f, 0.55f);
-        r += mix * (0.72f + 0.38f * warm);
-        g += mix * (0.10f + 0.24f * warm);
-        b += mix * (0.02f + 0.08f * (1.0f - warm));
+        float redKey = fmaxf(halR * 1.28f, lum * 0.92f);
+        float mix = duxunClamp(fH * 0.52f, 0.0f, 0.85f);
+        float veil = duxunClamp(redKey * mix, 0.0f, 0.95f);
+        float baseLum = duxunClamp(0.2126f * r + 0.7152f * g + 0.0722f * b, 0.0f, 1.4f);
+        float ringBias = 1.15f - 0.75f * duxunCudaSmoothstep(0.72f, 1.10f, baseLum);
+        ringBias = duxunClamp(ringBias, 0.32f, 1.15f);
+
+        r += veil * ringBias * (0.96f + 0.48f * warm);
+        g += veil * ringBias * (0.035f + 0.135f * warm);
+        b += veil * ringBias * (0.003f + 0.020f * (1.0f - warm));
+
+        float h = duxunClamp(fHalationHue, 0.0f, 1.0f);
+        float impact = duxunClamp(fHalationImpact, 0.0f, 1.0f);
+        float blueComp = duxunClamp(fHalationBlueComp, 0.0f, 1.0f);
+        float loc = duxunClamp(fHalationLocal, 0.0f, 1.0f);
+        float glob = duxunClamp(fHalationGlobal, 0.0f, 1.0f);
+        float controlMix = fH * (0.030f + 0.120f * impact) * lum;
+        r += controlMix * (0.74f + 0.34f * loc + 0.08f * glob);
+        g += controlMix * (0.065f + 0.115f * h);
+        b += controlMix * (0.010f + 0.070f * (1.0f - h)) * (1.0f - 0.78f * blueComp);
+
+        float haloTint = duxunClamp((veil * ringBias * (0.48f + 0.38f * warm)) + controlMix * (2.20f + 1.80f * impact), 0.0f, 0.72f);
+        float orangeG = r * (0.24f + 0.10f * (1.0f - warm));
+        float redB = r * (0.018f + 0.045f * (1.0f - warm));
+        g = duxunLerp(g, fminf(g, orangeG), haloTint);
+        b = duxunLerp(b, fminf(b, redB), haloTint);
+        float fringe = duxunClamp(fHalationDefringe, 0.0f, 1.0f) * lum * fH;
+        float outLum = 0.2126f * r + 0.7152f * g + 0.0722f * b;
+        b = duxunLerp(b, fminf(b, outLum * 0.92f + r * 0.08f), fringe);
     }
     dst[di + 0] = duxunClamp(r, 0.0f, 1.0f);
     dst[di + 1] = duxunClamp(g, 0.0f, 1.0f);
@@ -2655,6 +2708,8 @@ static bool tryCudaGlowRender(const GpuRenderRequest& gpuRequest,
         (void*)&srcWidth, (void*)&srcHeight, (void*)&dstStrideFloats,
         (void*)&glowWidth, (void*)&glowHeight,
         (void*)&enableBloom, (void*)&enableHalation, (void*)&args.fH, (void*)&args.fHalationWarmth,
+        (void*)&args.fHalationLocal, (void*)&args.fHalationGlobal, (void*)&args.fHalationHue,
+        (void*)&args.fHalationBlueComp, (void*)&args.fHalationImpact, (void*)&args.fHalationDefringe,
         (void*)&args.fBloom, (void*)&args.fBloomRadius, (void*)&args.fBloomDetail,
         (void*)&args.fBloomSaveLights, (void*)&args.fBloomDefringe,
         (void*)&showBloomMask
@@ -3169,16 +3224,16 @@ static void applyFujiAgfaCineStillDefaults(int idx, PresetCustomDefaults& d, flo
         d.filmGrainResolution = 0.55;
         d.filmGrainChroma = 0.32;
         d.halationEnabled = ENABLE_ON;
-        d.halationAmount = 0.22;
-        d.halationThreshold = 0.80;
-        d.halationRadius = 0.52;
-        d.halationWarmth = 0.82;
-        d.halationLocal = 0.50;
-        d.halationGlobal = 0.06;
-        d.halationHue = 0.40;
-        d.halationBlueComp = 0.66;
-        d.halationImpact = 0.36;
-        d.halationDefringe = 0.34;
+        d.halationAmount = 0.34;
+        d.halationThreshold = 0.74;
+        d.halationRadius = 0.60;
+        d.halationWarmth = 0.96;
+        d.halationLocal = 0.72;
+        d.halationGlobal = 0.025;
+        d.halationHue = 0.72;
+        d.halationBlueComp = 0.86;
+        d.halationImpact = 0.58;
+        d.halationDefringe = 0.42;
         d.bloomEnabled = ENABLE_SKIP;
         d.bloomAmount = 0.0;
         d.bloomThreshold = 0.90;
@@ -4298,6 +4353,18 @@ static OfxStatus renderAction(OfxImageEffectHandle effect, OfxPropertySetHandle 
     float fHalationBlueComp = (float)halationBlueComp;
     float fHalationImpact = (float)halationImpact;
     float fHalationDefringe = (float)halationDefringe;
+    if (presetNameHas(filmIdx, "CineStill 800T") && useHalation) {
+        fH = fmaxf(fH, clampf(0.34f * halationGain, 0.0f, 1.0f));
+        fHalationThreshold = fminf(fHalationThreshold, 0.74f);
+        fHalationRadius = fmaxf(fHalationRadius, clampf(0.60f * halationRadiusGain, 0.0f, 1.0f));
+        fHalationWarmth = fmaxf(fHalationWarmth, clampf(0.96f * halationWarmthGain, 0.0f, 1.0f));
+        fHalationLocal = fmaxf(fHalationLocal, 0.72f);
+        fHalationGlobal = fminf(fHalationGlobal, 0.025f);
+        fHalationHue = fmaxf(fHalationHue, 0.72f);
+        fHalationBlueComp = fmaxf(fHalationBlueComp, 0.86f);
+        fHalationImpact = fmaxf(fHalationImpact, 0.58f);
+        fHalationDefringe = fmaxf(fHalationDefringe, 0.42f);
+    }
     float fBloom = useBloom ? clampf((float)bloomAmount * 0.42f * bloomGain, 0.0f, 1.0f) : 0.0f;
     float fBloomThreshold = (float)bloomThreshold;
     float fBloomRadius = clampf((float)bloomRadius * bloomRadiusGain, 0.0f, 1.0f);

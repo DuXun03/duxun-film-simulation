@@ -21,6 +21,9 @@ echo Project root: %PROJECT_ROOT%
 echo Build OFX:    %BUILD_OFX%
 echo Install OFX:  %INSTALL_OFX%
 echo.
+echo Reinstall policy: existing DuXun Film Simulation OFX v5.0 files at this path will be overwritten.
+echo Please close DaVinci Resolve before installing or reinstalling.
+echo.
 
 if not exist "%BUILD_OFX%" (
     echo [ERROR] Build artifact not found.
@@ -31,6 +34,13 @@ if not exist "%BUILD_OFX%" (
 net session >nul 2>&1
 if errorlevel 1 (
     echo [WARN] This script may need an Administrator shell to write Program Files.
+)
+
+tasklist /FI "IMAGENAME eq Resolve.exe" 2>nul | find /I "Resolve.exe" >nul
+if not errorlevel 1 (
+    echo [WARN] DaVinci Resolve appears to be running.
+    echo Close Resolve before reinstalling so the host reloads the OFX bundle cleanly.
+    echo.
 )
 
 if not exist "%INSTALL_DIR%\" (

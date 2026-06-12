@@ -48,6 +48,22 @@ class CudaKernelNvrtcTests(unittest.TestCase):
         for cpu_only_token in ["GlowBuffer", "buildGlowBuffer", "std::", "malloc", "free("]:
             self.assertNotIn(cpu_only_token, kernel_source)
 
+    def test_embedded_cuda_halation_is_red_orange_not_white_rgb_blur(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        kernel_source = extract_cuda_source(source)
+        for token in [
+            "float redLeak = fmaxf(pr, lum * 1.12f) * w",
+            "mask[i + 1] = redLeak * 0.30f",
+            "mask[i + 2] = redLeak * 0.025f",
+            "float ringBias = 1.15f - 0.75f * duxunCudaSmoothstep(0.72f, 1.10f, baseLum)",
+            "float haloTint = duxunClamp((veil * ringBias * (0.48f + 0.38f * warm))",
+            "float redB = r * (0.018f + 0.045f * (1.0f - warm))",
+            "float fHalationBlueComp",
+            "float fHalationImpact",
+        ]:
+            self.assertIn(token, kernel_source)
+        self.assertNotIn("mask[i + 0] = pr * w;\n    mask[i + 1] = pg * w;\n    mask[i + 2] = pb * w;", kernel_source)
+
     def test_embedded_cuda_kernel_compiles_with_resolve_nvrtc(self):
         source = SOURCE.read_text(encoding="utf-8")
         kernel_source = extract_cuda_source(source).encode("utf-8")

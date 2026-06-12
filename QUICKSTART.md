@@ -60,13 +60,43 @@ C:\Program Files\Common Files\OFX\Plugins\DuXunFilmSim.ofx.bundle\Contents\Win64
 DuXun -> DuXun Film Simulation
 ```
 
+重装同样使用 `scripts\install.bat`。脚本会覆盖同一路径的 v5.0 OFX 文件，并重新校验 build/install SHA256。
+
+卸载开发安装使用：
+
+```bat
+scripts\uninstall.bat
+```
+
 ## 5. 如果插件没有出现
 
 先确认 `build\compile_log.txt` 或 `build\build_result.txt` 中没有编译失败。
 
 如果编译成功但 Resolve 仍不加载，检查 Resolve 的 OFX 缓存。此前加载失败时，缓存里可能留下 `status=2` 的失败记录，导致 Resolve 后续启动不再尝试重新加载插件。
 
-## 6. 当前不要混淆的两条线
+关闭 Resolve 后，优先重命名这个缓存文件再重启 Resolve：
+
+```text
+%APPDATA%\Blackmagic Design\DaVinci Resolve\Support\OFXPluginCacheV2.xml
+```
+
+如果有旧缓存文件，也一并检查：
+
+```text
+%APPDATA%\Blackmagic Design\DaVinci Resolve\Support\OFXPluginCache.xml
+```
+
+## 6. 最小用户验证
+
+1. 重启 DaVinci Resolve。
+2. 打开一个项目和时间线。
+3. 在 Effects Library 中找到 `DuXun -> DuXun Film Simulation`。
+4. 把效果拖到一个 clip 上。
+5. 在效果控制中选择 Fuji Superia、Agfa Vista 或 CineStill 800T。
+6. 确认画面有胶片化变化，再通过禁用效果或 identity 对比确认 OFX 正在生效。
+7. 版本/二进制验证以 `scripts\install.bat` 输出的 SHA256 为准；发布包阶段再与 `checksums\SHA256SUMS.txt` 对比。
+
+## 7. 当前不要混淆的两条线
 
 - OpenFX v5.0 是当前主线和交付目标。
 - 旧 DCTL/LUT package 安装方式不是当前交付主线。

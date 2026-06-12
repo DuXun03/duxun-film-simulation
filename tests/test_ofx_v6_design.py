@@ -615,7 +615,7 @@ class OfxV6DesignTests(unittest.TestCase):
             "d.filmGrainAmount = 0.34",
             "d.filmGrainResolution = 0.54",
             "d.colorDensity = 0.37",
-            "d.halationAmount = 0.22",
+            "d.halationAmount = 0.34",
             "d.halationAmount = 0.08",
         ]:
             self.assertIn(token, self.source)
@@ -630,6 +630,27 @@ class OfxV6DesignTests(unittest.TestCase):
                 re.S,
             ),
         )
+
+    def test_cinestill_800t_defaults_prioritize_red_orange_halation(self):
+        self.assertRegex(
+            self.source,
+            re.compile(
+                r'presetNameHas\(idx, "CineStill 800T"\).*?'
+                r"d\.halationAmount = 0\.34;.*?"
+                r"d\.halationThreshold = 0\.74;.*?"
+                r"d\.halationWarmth = 0\.96;.*?"
+                r"d\.halationGlobal = 0\.025;.*?"
+                r"d\.halationHue = 0\.72;.*?"
+                r"d\.halationBlueComp = 0\.86;",
+                re.S,
+            ),
+        )
+        self.assertIn("redLeak = fmaxf(pr, lum * 1.12f) * w", self.source)
+        self.assertIn("float ringBias = 1.15f - 0.75f * smoothstepf(0.72f, 1.10f, baseLum)", self.source)
+        self.assertIn("float haloTint = clampf(veil * ringBias * (0.48f + 0.38f * warm)", self.source)
+        self.assertIn("float redB = r * (0.018f + 0.045f * (1.0f - warm))", self.source)
+        self.assertIn('presetNameHas(filmIdx, "CineStill 800T") && useHalation', self.source)
+        self.assertIn("fHalationGlobal = fminf(fHalationGlobal, 0.025f)", self.source)
 
     def test_render_uses_enabled_flags_profiles_and_quality_scale(self):
         for token in [

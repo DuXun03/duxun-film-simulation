@@ -35,6 +35,7 @@ film-sim-plugin/
 ├── scripts/
 │   ├── compile_all.bat
 │   ├── install.bat
+│   ├── uninstall.bat
 │   ├── test_ofx_mock.py
 │   └── generate_film_luts.py
 ├── presets/
@@ -103,6 +104,47 @@ C:\Program Files\Common Files\OFX\Plugins\DuXunFilmSim.ofx.bundle\Contents\Win64
 
 如果 Resolve 曾经缓存过加载失败状态，需要清理 OFX 插件缓存后再启动 Resolve。之前的排查记录显示，缓存失败状态会让 Resolve 后续启动直接跳过插件加载。
 
+## 视觉基线冻结
+
+第二轮 Resolve A/B 结果已经固化：
+
+- Fuji Superia 100/200/400/800/1600/HG 1600: visual baseline frozen
+- Agfa Vista 100/200/400: visual baseline frozen
+- CineStill 800T: visual baseline frozen，CPU 与 CUDA halation 路径均使用红橙 leakage，避免白色/黄白 halo。
+- CineStill 50D: 保持第一轮 daylight exterior pass 状态，第二轮未重新打开调参。
+
+证据入口：
+
+- `docs/resolve-visual-ab-2026-06-11.md`
+- `docs/visual-ab/2026-06-11/`
+- `docs/restart-handoff-2026-06-11.md`
+
+## 发布前交付入口
+
+发布前安装包、重装、卸载、Resolve OFX 缓存清理和最小用户验证从这里继续：
+
+```text
+docs/release-preflight-2026-06-12.md
+```
+
+当前开发包安装/重装仍使用：
+
+```bat
+scripts\install.bat
+```
+
+卸载开发安装使用：
+
+```bat
+scripts\uninstall.bat
+```
+
+清理 Resolve OFX 缓存前必须先关闭 Resolve。本机已确认的缓存路径：
+
+```text
+%APPDATA%\Blackmagic Design\DaVinci Resolve\Support\OFXPluginCacheV2.xml
+```
+
 ## 验证
 
 运行完整单元测试：
@@ -133,9 +175,10 @@ python -m unittest discover -s tests -q
 
 ## 下一步
 
-当前推荐先保持 v5.0 baseline 稳定，再进入功能扩展：
+当前推荐先把 v5.0 visual baseline 和安装交付稳定下来，再进入功能扩展：
 
-1. 固化 Resolve 视觉 A/B 证据，继续补 close-up skin、bright sky 和 tungsten practical 场景。
-2. 保持 OpenFX v5.0 bundle 安装脚本和 hash 校验稳定。
-3. 在 preset differentiation 稳定后，再推进 installer/licensing/trial/buyout 流程。
-4. 后续如需集成 DCTL/LUT 资源，先设计资源包和 runtime 加载方案；这不是当前交付主线。
+1. 按 `docs/release-preflight-2026-06-12.md` 整理 release package 目录和 `SHA256SUMS.txt`。
+2. 用 `scripts\install.bat` / `scripts\uninstall.bat` 验证安装、重装、卸载闭环。
+3. 把最小用户文档收敛为发布包内的 `README.md` / `QUICKSTART.md`。
+4. Trial、activation、buyout 只做方案草案；当前不要实现授权逻辑。
+5. 后续如需集成 DCTL/LUT 资源，先设计资源包和 runtime 加载方案；这不是当前交付主线。
