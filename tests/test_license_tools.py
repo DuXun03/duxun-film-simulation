@@ -147,6 +147,36 @@ class LicenseToolTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("ok: license valid", result.stdout)
 
+    def test_sign_tool_generates_private_key_and_matching_public_key_file(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            private_key_path = root / "offline-private-key.pem"
+            public_key_path = root / "offline-public-key.pem"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/license_sign_tool.py",
+                    "--generate-private-key",
+                    str(private_key_path),
+                    "--public-key-output",
+                    str(public_key_path),
+                ],
+                cwd=Path(__file__).resolve().parents[1],
+                capture_output=True,
+                text=True,
+            )
+
+            private_key = duxun_license.load_private_key(private_key_path)
+            public_key = duxun_license.load_public_key(public_key_path)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("Public key written:", result.stdout)
+        self.assertEqual(
+            private_key.public_key().public_numbers(),
+            public_key.public_numbers(),
+        )
+
     def test_install_cli_rejects_invalid_license_without_overwriting_existing_file(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

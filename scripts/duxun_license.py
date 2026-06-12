@@ -207,7 +207,7 @@ def load_public_key(path: Path) -> ec.EllipticCurvePublicKey:
     return key
 
 
-def write_public_key(path: Path, public_key: ec.EllipticCurvePublicKey) -> None:
+def write_public_key(path: Path, public_key: ec.EllipticCurvePublicKey) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(
         public_key.public_bytes(
@@ -215,6 +215,7 @@ def write_public_key(path: Path, public_key: ec.EllipticCurvePublicKey) -> None:
             serialization.PublicFormat.SubjectPublicKeyInfo,
         )
     )
+    return path
 
 
 def sign_license_document(
