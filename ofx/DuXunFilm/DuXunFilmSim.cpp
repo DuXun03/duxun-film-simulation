@@ -38,6 +38,9 @@
 #include "ofxParam.h"
 #include "ofxMemory.h"
 #include "ofxMultiThread.h"
+#include "ofxMessage.h"
+
+#include "DuXunLicense.h"
 
 // ============================================================
 // Plugin Constants
@@ -672,6 +675,7 @@ static OfxImageEffectSuiteV1*       gEffectSuite = nullptr;
 static OfxParameterSuiteV1*         gParamSuite  = nullptr;
 static OfxMemorySuiteV1*            gMemorySuite = nullptr;
 static OfxMultiThreadSuiteV1*       gThreadSuite = nullptr;
+static OfxMessageSuiteV2*           gMessageSuite = nullptr;
 
 // ============================================================
 // Pixel Processing
@@ -1320,6 +1324,26 @@ static inline void applyFilmDamage(float amount, float dustAmount, float scratch
     applyDustAndScratches(amount, dustAmount, scratchAmount, x, y, renderTime, r, g, b);
 }
 
+static inline void applyLicenseWatermark(int width, int height, int x, int y,
+                                         float& r, float& g, float& b) {
+    int diagonal = (x + y) % 112;
+    bool stripe = diagonal < 6;
+    bool lowerBand = y > (height * 7) / 8;
+    bool badge = lowerBand && x > width / 24 && x < width / 3;
+    if (stripe) {
+        r = lerpf(r, 1.0f, 0.20f);
+        g = lerpf(g, 0.10f, 0.20f);
+        b = lerpf(b, 0.04f, 0.20f);
+    }
+    if (badge) {
+        bool edge = y < (height * 7) / 8 + 4 || y > height - 8 || x < width / 24 + 4 || x > width / 3 - 4;
+        float mix = edge ? 0.55f : 0.25f;
+        r = lerpf(r, 1.0f, mix);
+        g = lerpf(g, 0.78f, mix);
+        b = lerpf(b, 0.24f, mix);
+    }
+}
+
 struct RenderThreadArgs {
     const float* __restrict src;
     float* __restrict dst;
@@ -1416,6 +1440,7 @@ struct RenderThreadArgs {
     float fFilmDust;
     float fFilmScratch;
     double renderTime;
+    bool applyLicenseWatermark;
 };
 
 static void renderRows(const RenderThreadArgs& args, int yBegin, int yEnd) {
@@ -1548,6 +1573,7 @@ static void renderRows(const RenderThreadArgs& args, int yBegin, int yEnd) {
             if (!args.showBloomMask && args.doDamage) applyFilmDamage(args.fDamage, args.fFilmDust, args.fFilmScratch, x, y, args.renderTime, r, g, b);
 
             applyOutputTransform(args.outputTransform, r, g, b);
+            if (args.applyLicenseWatermark) applyLicenseWatermark(args.width, args.height, x, y, r, g, b);
 
             args.dst[di]   = clampf(r, 0.0f, 1.0f);
             args.dst[di+1] = clampf(g, 0.0f, 1.0f);
@@ -1605,6 +1631,7 @@ OfxExport OfxStatus OfxSetHost(const OfxHost* host) {
         gParamSuite  = nullptr;
         gMemorySuite = nullptr;
         gThreadSuite = nullptr;
+        gMessageSuite = nullptr;
         return kOfxStatOK;
     }
     gPropSuite   = (OfxPropertySuiteV1*)gHost->fetchSuite(gHost->host, kOfxPropertySuite, 1);
@@ -1612,6 +1639,7 @@ OfxExport OfxStatus OfxSetHost(const OfxHost* host) {
     gParamSuite  = (OfxParameterSuiteV1*)gHost->fetchSuite(gHost->host, kOfxParameterSuite, 1);
     gMemorySuite = (OfxMemorySuiteV1*)gHost->fetchSuite(gHost->host, kOfxMemorySuite, 1);
     gThreadSuite = (OfxMultiThreadSuiteV1*)gHost->fetchSuite(gHost->host, kOfxMultiThreadSuite, 1);
+    gMessageSuite = (OfxMessageSuiteV2*)gHost->fetchSuite(gHost->host, kOfxMessageSuite, 2);
     return kOfxStatOK;
 }
 
@@ -2864,9 +2892,68 @@ static OfxStatus defineChoiceParam(OfxParamSetHandle ps, const char* name, const
     return kOfxStatOK;
 }
 
+static OfxStatus defineStringLabelParam(OfxParamSetHandle ps, const char* name, const char* label,
+                                        const char* value, const char* parent) {
+    OfxPropertySetHandle h;
+    if (gParamSuite->paramDefine(ps, kOfxParamTypeString, name, &h) != kOfxStatOK)
+        return kOfxStatErrBadHandle;
+    gPropSuite->propSetString(h, kOfxPropLabel, 0, label);
+    gPropSuite->propSetString(h, kOfxParamPropDefault, 0, value);
+    gPropSuite->propSetString(h, kOfxParamPropStringMode, 0, kOfxParamStringIsLabel);
+    gPropSuite->propSetInt(h, kOfxParamPropAnimates, 0, 0);
+    if (parent) gPropSuite->propSetString(h, kOfxParamPropParent, 0, parent);
+    return kOfxStatOK;
+}
+
+static OfxStatus definePushButtonParam(OfxParamSetHandle ps, const char* name, const char* label,
+                                       const char* hint, const char* parent) {
+    OfxPropertySetHandle h;
+    if (gParamSuite->paramDefine(ps, kOfxParamTypePushButton, name, &h) != kOfxStatOK)
+        return kOfxStatErrBadHandle;
+    gPropSuite->propSetString(h, kOfxPropLabel, 0, label);
+    if (hint) gPropSuite->propSetString(h, kOfxParamPropHint, 0, hint);
+    if (parent) gPropSuite->propSetString(h, kOfxParamPropParent, 0, parent);
+    return kOfxStatOK;
+}
+
 static void defineEnabledParam(OfxParamSetHandle ps, const char* name, const char* parent) {
     const char* options[] = { "跳过", "启用" };
     defineChoiceParam(ps, name, "开关", "选择“跳过”后该模块完全不参与渲染。", ENABLE_SKIP, parent, options, 2);
+}
+
+static void setStringParamIfPresent(OfxParamSetHandle pSet, const char* name, const std::string& value) {
+    OfxParamHandle ph = nullptr;
+    if (gParamSuite->paramGetHandle(pSet, name, &ph, nullptr) == kOfxStatOK)
+        gParamSuite->paramSetValue(ph, value.c_str());
+}
+
+static void updateLicenseStatusParam(OfxParamSetHandle pSet, const duxun_license::LocalLicenseState& state) {
+    setStringParamIfPresent(pSet, "licenseStatus", state.statusText);
+}
+
+static void postLicenseMessage(OfxImageEffectHandle effect, const duxun_license::LocalLicenseState& state) {
+    if (!gMessageSuite) return;
+    if (!state.watermarkRequired) {
+        gMessageSuite->clearPersistentMessage(effect);
+        return;
+    }
+    const char* messageType = state.trialActive && !state.expired ? kOfxMessageMessage : kOfxMessageWarning;
+    gMessageSuite->setPersistentMessage(effect, messageType, "DuXunLicense", "%s", state.statusText.c_str());
+}
+
+static OfxStatus defineGroupParam(OfxParamSetHandle ps, const char* name, const char* label,
+                                   int open, const char* parent);
+
+static void defineLicenseParams(OfxParamSetHandle ps) {
+    defineGroupParam(ps, "grpLicense", "License", 0, nullptr);
+    defineStringLabelParam(ps, "licenseStatus", "Status",
+                           "License: checked on render or reload.", "grpLicense");
+    definePushButtonParam(ps, "generateActivationRequest", "Generate Activation Request",
+                          "Write %PROGRAMDATA%\\DuXun\\FilmSim\\activation-request.json for offline activation.",
+                          "grpLicense");
+    definePushButtonParam(ps, "reloadLicense", "Reload License",
+                          "Reload %PROGRAMDATA%\\DuXun\\FilmSim\\license.json after installing a signed license.",
+                          "grpLicense");
 }
 
 static void defineGrainProfileParam(OfxParamSetHandle ps, const char* parent) {
@@ -3973,6 +4060,7 @@ static OfxStatus describeInContextAction(OfxImageEffectHandle effect, OfxPropert
     setSecretIfPresent(paramSet, "grain");
     setSecretIfPresent(paramSet, "vignette");
 
+    defineLicenseParams(paramSet);
     defineCustomPlaceholderParams(paramSet);
 
     // === PAGE ===
@@ -3983,6 +4071,7 @@ static OfxStatus describeInContextAction(OfxImageEffectHandle effect, OfxPropert
     gPropSuite->propSetString(h, kOfxParamPropPageChild, 2, "grpCurve");
     gPropSuite->propSetString(h, kOfxParamPropPageChild, 3, "grpColor");
     gPropSuite->propSetString(h, kOfxParamPropPageChild, 4, "grpCustom");
+    gPropSuite->propSetString(h, kOfxParamPropPageChild, 5, "grpLicense");
 
     return kOfxStatOK;
 }
@@ -4004,6 +4093,23 @@ static OfxStatus instanceChangedAction(OfxImageEffectHandle effect,
     OfxParamSetHandle pSet = nullptr;
     gEffectSuite->getParamSet(effect, &pSet);
     if (!pSet) return kOfxStatErrBadHandle;
+
+    if (strcmp(paramName, "generateActivationRequest") == 0) {
+        std::string requestPath = duxun_license::writeActivationRequest();
+        setStringParamIfPresent(pSet, "licenseStatus", std::string("Activation request written: ") + requestPath);
+        if (gMessageSuite) {
+            gMessageSuite->setPersistentMessage(effect, kOfxMessageMessage, "DuXunLicense",
+                                                "Activation request written: %s", requestPath.c_str());
+        }
+        return kOfxStatOK;
+    }
+
+    if (strcmp(paramName, "reloadLicense") == 0) {
+        duxun_license::LocalLicenseState licenseState = duxun_license::reloadLocalLicense();
+        updateLicenseStatusParam(pSet, licenseState);
+        postLicenseMessage(effect, licenseState);
+        return kOfxStatOK;
+    }
 
     // --- Brand changed ---
     if (strcmp(paramName, "filmBrand") == 0) {
@@ -4080,6 +4186,10 @@ static OfxStatus renderAction(OfxImageEffectHandle effect, OfxPropertySetHandle 
     OfxParamSetHandle paramSet = nullptr;
     gEffectSuite->getParamSet(effect, &paramSet);
     if (!paramSet) return kOfxStatErrBadHandle;
+
+    duxun_license::LocalLicenseState licenseState = duxun_license::evaluateLocalLicense();
+    updateLicenseStatusParam(paramSet, licenseState);
+    postLicenseMessage(effect, licenseState);
 
     // Read params
     double contrast = 1.15, shoulder = 0.35, toe = 0.25;
@@ -4487,11 +4597,17 @@ static OfxStatus renderAction(OfxImageEffectHandle effect, OfxPropertySetHandle 
         fHalationLocal, fHalationGlobal, fHalationHue,
         fHalationBlueComp, fHalationImpact, fHalationDefringe,
         fV, fVignetteRadius, fVignetteFeather,
-        fDamage, fFilmDust, fFilmScratch, renderTime
+        fDamage, fFilmDust, fFilmScratch, renderTime, licenseState.watermarkRequired
     };
 
     GpuRenderRequest gpuRequest = readGpuRenderRequest(inArgs, srcImg, dstImg);
     logGpuEvent("request", gpuRequest, &args, "received");
+    if (gpuRequest.requested && licenseState.watermarkRequired) {
+        logGpuEvent("cuda_fallback", gpuRequest, &args, "license_watermark_requires_cpu", 0.0);
+        gEffectSuite->clipReleaseImage(srcImg);
+        gEffectSuite->clipReleaseImage(dstImg);
+        return kOfxStatGPURenderFailed;
+    }
     if (gpuRequest.requested && !gpuRequest.available) {
         logGpuEvent("cuda_fallback", gpuRequest, &args, "requested_unavailable", 0.0);
         gEffectSuite->clipReleaseImage(srcImg);
