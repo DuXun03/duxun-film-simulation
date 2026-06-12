@@ -49,7 +49,7 @@ Date: 2026-06-12
 
 ```text
 python -m unittest discover -s tests -q
-Ran 67 tests in 0.673s
+Ran 68 tests in 0.753s
 OK
 ```
 
@@ -62,17 +62,36 @@ BUILD_OK
 新构建 OFX SHA256：
 
 ```text
-17B07A6798A8D1F71304D0E4E06AC1159470EF25400C84B0A72416B492565203
+E7C5E0D4FF7BDF8F12ECD32C19DDE9C98F154251D4C5584D4EAA4E5011714014
 ```
 
 安装：
 
 ```text
 cmd /c scripts\install.bat
-Build hash:     17b07a6798a8d1f71304d0e4e06ac1159470ef25400c84b0a72416b492565203
-Installed hash: 17b07a6798a8d1f71304d0e4e06ac1159470ef25400c84b0a72416b492565203
+Build hash:     e7c5e0d4ff7bdf8f12ecd32c19dde9c98f154251d4c5584d4eaa4e5011714014
+Installed hash: e7c5e0d4ff7bdf8f12ecd32c19dde9c98f154251d4c5584d4eaa4e5011714014
 [OK] Installed OpenFX v5.0 bundle
 ```
+
+## License MVP Beta Package
+
+Package name:
+
+```text
+DuXunFilmSim-OFX-v5.0-license-mvp.zip
+```
+
+Package SHA256 is recorded outside the archive in `DuXunFilmSim-OFX-v5.0-license-mvp.zip.sha256`.
+
+Package smoke from extracted zip:
+
+- `scripts\install.bat` installed the packaged OFX and the installed hash matched `build\DuXunFilmSim.ofx`.
+- `scripts\generate_activation_request.bat` generated `activation-request.json`.
+- A temporary staging ECDSA P-256 keypair signed a buyout `license.json`.
+- `scripts\install_license.bat --public-key ... --machine-hash ... license.json` installed the staging buyout license.
+- `scripts\verify_license_test.py --public-key ... --machine-hash ...` returned `ok: license valid`.
+- Package audit found no private key material, `.pem`, `.key`, or `license_sign_tool.py`.
 
 ## Resolve Smoke
 
