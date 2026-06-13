@@ -131,6 +131,10 @@ License MVP beta 交付包已经单独收口，不覆盖无授权 beta 包：
 
 ```text
 DuXunFilmSim-OFX-v5.0-license-mvp.zip
+docs/beta-release-readiness-2026-06-13.md
+docs/beta-operator-runbook-2026-06-13.md
+docs/beta-customer-test-guide-2026-06-13.md
+docs/beta-feedback-template-2026-06-13.md
 docs/licensing-mvp-qa-2026-06-12.md
 docs/license-key-custody-and-issuance-2026-06-13.md
 ```
