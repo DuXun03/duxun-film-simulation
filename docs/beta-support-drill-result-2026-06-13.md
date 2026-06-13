@@ -1,144 +1,144 @@
-# DuXun Film Simulation License MVP Beta Support Drill Result
+# DuXun Film Simulation License MVP Beta 支持彩排结果
 
-Date: 2026-06-13
+日期：2026-06-13
 
-## Scope
+## 范围
 
-This document records the public, git-safe summary of one Beta support drill rehearsal for the DuXun Film Simulation v5.0 License MVP.
+本文记录 DuXun Film Simulation v5.0 License MVP 的一次 Beta 支持闭环彩排结果。内容是可提交、可公开阅读的摘要。
 
-Private drill artifacts were kept outside git. This summary intentionally does not include private keys, `_private` paths, real customer data, real ledger data, `activation-request.json`, or `license.json` contents.
+私密彩排材料保存在 git 外部。本文不包含私钥、私密目录路径、真实客户资料、真实 ledger 数据、`activation-request.json` 内容或 `license.json` 内容。
 
-All dry-run/staging materials used in this drill are marked as not valid for real customer authorization.
+本次彩排使用的 dry-run/staging 材料均只用于流程验证，不可用于真实客户授权。
 
-## Drill Identity
+## 彩排身份
 
-- Drill run: `run-2026-06-13-001`
-- Synthetic tester id: `CUST-BETA-DRILL-001`
-- Synthetic order id: `ORDER-BETA-DRILL-20260613-001`
-- Synthetic support case: `CASE-BETA-DRILL-20260613-001`
-- Archive code: `duxun-filmsim-v5-beta-drill-2026-06-13/run-2026-06-13-001`
-- Authorization note: `DRILL_ONLY_NOT_FOR_REAL_CUSTOMER_AUTHORIZATION`
+- 彩排 run：`run-2026-06-13-001`
+- 虚拟测试用户 id：`CUST-BETA-DRILL-001`
+- 虚拟订单 id：`ORDER-BETA-DRILL-20260613-001`
+- 虚拟支持 case：`CASE-BETA-DRILL-20260613-001`
+- 外部归档代号：`duxun-filmsim-v5-beta-drill-2026-06-13/run-2026-06-13-001`
+- 授权标记：`DRILL_ONLY_NOT_FOR_REAL_CUSTOMER_AUTHORIZATION`
 
-## Release Anchors
+## 发布锚点
 
-- Package: `DuXunFilmSim-OFX-v5.0-license-mvp.zip`
-- Package SHA256: `995B637F1F8EC6006741521540FF2D36D706687D106B70F66188B001F609E38E`
-- Expected OFX SHA256: `E7C5E0D4FF7BDF8F12ECD32C19DDE9C98F154251D4C5584D4EAA4E5011714014`
-- Product id: `duxun-filmsim-ofx-v5`
-- Product version: `5.0`
+- 包名：`DuXunFilmSim-OFX-v5.0-license-mvp.zip`
+- ZIP SHA256：`995B637F1F8EC6006741521540FF2D36D706687D106B70F66188B001F609E38E`
+- 预期 OFX SHA256：`E7C5E0D4FF7BDF8F12ECD32C19DDE9C98F154251D4C5584D4EAA4E5011714014`
+- 产品 id：`duxun-filmsim-ofx-v5`
+- 产品版本：`5.0`
 
-The release zip was not modified or repackaged during the drill.
+彩排期间没有修改或重新打包 release zip。
 
-## Baseline Results
+## 基线检查结果
 
-- `git status --short --branch`: clean `main` at drill start.
-- `python -m unittest discover -s tests -q`: `Ran 68 tests`, `OK`.
-- `Get-FileHash -Algorithm SHA256 DuXunFilmSim-OFX-v5.0-license-mvp.zip`: matched the expected package hash.
-- `tar -tf DuXunFilmSim-OFX-v5.0-license-mvp.zip | rg -i "license_sign_tool|private|\.pem|\.key|secret|ledger"`: no matches.
-- Repository private-key block scan: no matches.
+- `git status --short --branch`：彩排开始时为干净的 `main`。
+- `python -m unittest discover -s tests -q`：`Ran 68 tests`，`OK`。
+- `Get-FileHash -Algorithm SHA256 DuXunFilmSim-OFX-v5.0-license-mvp.zip`：与预期 ZIP hash 一致。
+- release zip 内敏感材料审计：未发现 `license_sign_tool`、`private`、`.pem`、`.key`、`secret`、`ledger` 命中。
+- 仓库 private-key block 扫描：无命中。
 
-## Normal First Activation
+## 路径一：正常首次激活
 
-Result: PASS.
+结果：通过。
 
-Evidence summary:
+证据摘要：
 
-- Synthetic activation request was generated and archived outside git.
-- Dry-run signing material was used only for rehearsal.
-- Rehearsal buyout `license.json` was signed outside git.
-- License verification returned `ok: license valid`.
-- License install was simulated to an external archive path.
-- Installed-license SHA256 matched the signed-license SHA256.
-- Dry-run private key was not retained in the final drill archive.
+- 已生成虚拟 `activation-request.json`，并归档在 git 外部。
+- dry-run 签发材料仅用于本次彩排。
+- 彩排 buyout `license.json` 在 git 外部签发。
+- license 验签返回 `ok: license valid`。
+- license 安装流程模拟到外部归档路径。
+- 安装后的 license SHA256 与签发 license SHA256 一致。
+- 最终彩排归档中未保留 dry-run private key。
 
-This path confirms the operator handoff can support:
-
-```text
-activation request received -> request validated -> license signed -> license verified -> license installed -> buyout activated
-```
-
-## Trial-Stuck Triage
-
-Result: PASS.
-
-Scenario rehearsed:
+该路径确认 operator handoff 可以支撑：
 
 ```text
-install_license reports success, but Resolve still shows trial or watermark.
+收到 activation request -> 检查 request -> 签发 license -> 验签 -> 安装 license -> buyout activated
 ```
 
-Evidence summary:
+## 路径二：安装 license 后 Resolve 仍显示 trial
 
-- Archived license verified against the expected synthetic machine hash.
-- Wrong-machine verification was rehearsed with a synthetic mismatch.
-- Support note records the triage path: click `Reload License`, restart Resolve, confirm ProgramData `license.json`, request License section screenshot, request command output, and inspect `license.log` if present.
-- Manual-review recording path was rehearsed for unresolved or mismatch cases.
+结果：通过。
 
-Conclusion: the customer guide and operator runbook now give enough evidence requests to distinguish stale Resolve state from machine/license mismatch.
+彩排场景：
 
-## Resend And Machine Replacement
+```text
+install_license 显示成功，但 Resolve 仍显示 trial 或仍有 watermark。
+```
 
-Result: PASS.
+证据摘要：
 
-Resend decision:
+- 归档 license 在预期虚拟 machine hash 下验签通过。
+- 使用虚拟错误 machine hash 复现了 machine mismatch 类排查路径。
+- 支持记录覆盖了排查动作：点击 `Reload License`、重启 Resolve、确认 ProgramData 下 `license.json`、索取 License 面板截图、索取命令窗口截图、必要时检查 `license.log`。
+- 未解决或 mismatch 情况的 `manual_review` 记录路径已彩排。
 
-- Same synthetic customer, same order, same machine hash.
-- Decision rehearsed as resend archived license only.
-- No new license signing required.
-- Reissue count remains `0`.
+结论：当前用户测试指南和 operator runbook 足以帮助区分 Resolve 状态未刷新与 machine/license mismatch。
 
-Machine replacement decision:
+## 路径三：重发与换机判断
 
-- New synthetic replacement request was created outside git.
-- Replacement machine hash was distinct from the original synthetic request.
-- First replacement decision was rehearsed as approved.
-- Replacement license was signed and verified with dry-run material.
-- Reissue count moves to `1`.
+结果：通过。
 
-Suspicious replacement handling:
+重发判断：
 
-- Decision path remains `manual_review` or `rejected_suspicious_request`.
-- No signing until owner review.
-- No internal ledger rows or private signing details are sent to the tester.
+- 同一个虚拟客户、同一个订单、同一个 machine hash。
+- 判断结果为只重发已归档 license。
+- 不需要重新签发 license。
+- `reissueCount` 保持 `0`。
 
-## Archive Contents
+换机判断：
 
-External archive code:
+- 已在 git 外部创建新的虚拟换机 request。
+- 换机 machine hash 与原始虚拟 request 不同。
+- 首次换机判断为可批准。
+- 换机 license 使用 dry-run 材料签发并验签通过。
+- `reissueCount` 增加到 `1`。
+
+可疑换机处理：
+
+- 判断状态保持为 `manual_review` 或 `rejected_suspicious_request`。
+- owner review 前不签发。
+- 不向测试用户发送内部 ledger 行或私密签发细节。
+
+## 外部归档内容
+
+外部归档代号：
 
 ```text
 duxun-filmsim-v5-beta-drill-2026-06-13/run-2026-06-13-001
 ```
 
-Archive category summary:
+归档类别摘要：
 
-- Synthetic activation request.
-- Rehearsal license files.
-- Verification output.
-- Synthetic feedback.
-- Drill ledger copy.
-- Support notes.
-- Dry-run public verification material.
+- 虚拟 activation request。
+- 彩排 license 文件。
+- 验签输出。
+- 虚拟反馈。
+- 彩排 ledger copy。
+- 支持记录。
+- dry-run public verification material。
 
-The archive is outside git. This repository does not include private keys, actual request files, actual license files, real customer information, or real ledger rows from the drill.
+归档保存在 git 外部。本仓库未包含私钥、实际 request 文件、实际 license 文件、真实客户资料或真实 ledger 行。
 
-## Pass/Fail Conclusion
+## 结论
 
-PASS.
+通过。
 
-The support drill covered the required three paths:
+本次支持彩排覆盖了要求的三条路径：
 
-- Normal first activation.
-- License installed but Resolve still shows trial.
-- Resend and machine replacement decision flow.
+- 正常首次激活。
+- license 安装成功但 Resolve 仍显示 trial。
+- 重发与换机人工判断流程。
 
-No support-drill blocker remains before the first controlled real-user beta send.
+第一批受控真实用户 beta 发送前，没有剩余的 support-drill 阻断项。
 
-## Remaining Guardrails
+## 继续遵守的边界
 
-These are release guardrails, not blockers for the first controlled beta send:
+以下是发布边界，不是第一批受控 beta 发送的阻断项：
 
-- Use only the production `v1` private key that matches the embedded public key for real customer authorization.
-- Never use the dry-run/staging key for real customer licenses.
-- Keep real customer data, real ledgers, private keys, signing workspaces, `activation-request.json`, and `license.json` out of git.
-- Keep the License MVP zip frozen unless a blocking issue forces a new documented readiness record.
-- This is still a controlled beta send, not a formal public release.
+- 真实客户授权只能使用与包内 embedded public key 匹配的生产 `v1` private key。
+- dry-run/staging key 永远不能用于真实客户 license。
+- 真实客户资料、真实 ledger、私钥、签发工作区、`activation-request.json` 和 `license.json` 不进入 git。
+- 除非发现阻断级问题并重新记录 readiness，否则保持 License MVP zip 冻结。
+- 当前仍是受控 beta 发送，不是正式公开发布。
