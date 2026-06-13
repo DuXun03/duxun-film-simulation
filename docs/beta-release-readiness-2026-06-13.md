@@ -10,11 +10,11 @@ Date: 2026-06-13
 - Product id: `duxun-filmsim-ofx-v5`
 - Product version: `5.0`
 - Runtime key version: `v1`
-- Status: beta handoff ready, not a formal public release.
+- Status: ready for first controlled beta send, not a formal public release.
 
 Do not modify or repackage this zip unless a blocking issue is found and recorded with a new readiness document and new hashes.
 
-Run the beta support drill before sending the first real-user batch. After the drill passes, this package can move from operator handoff to the first controlled beta send.
+The beta support drill has passed. This package can move from operator handoff to the first controlled beta send.
 
 ## Beta Handoff Documents
 
@@ -22,6 +22,7 @@ Run the beta support drill before sending the first real-user batch. After the d
 - Customer test guide: `docs/beta-customer-test-guide-2026-06-13.md`
 - Feedback template: `docs/beta-feedback-template-2026-06-13.md`
 - Beta support drill: `docs/beta-support-drill-2026-06-13.md`
+- Beta support drill result: `docs/beta-support-drill-result-2026-06-13.md`
 - Operator ledger template: `docs/beta-operator-ledger-template-2026-06-13.md`
 - License custody reference: `docs/license-key-custody-and-issuance-2026-06-13.md`
 - Licensing QA record: `docs/licensing-mvp-qa-2026-06-12.md`
@@ -35,11 +36,12 @@ Current verified baseline:
 - License MVP package audit found no `license_sign_tool`, `private`, `.pem`, `.key`, or `secret` entries.
 - Tracked source scan found no private-key blocks.
 - Resolve smoke from the License MVP QA showed trial, activation request, license install, `Reload License`, buyout status, and watermark removal.
+- Beta support drill result passed normal first activation, trial-stuck triage, resend, and machine replacement decision paths.
 - Visual baseline remains frozen for Fuji Superia, Agfa Vista, and CineStill 800T.
 
 The package is suitable for controlled beta testers who can follow manual offline activation instructions and provide structured feedback.
 
-Current release decision: keep this package at beta handoff ready until `docs/beta-support-drill-2026-06-13.md` has been rehearsed and archived outside git. Send the first real-user batch only after the support drill confirms request intake, signing, activation troubleshooting, feedback capture, and ledger recording.
+Current release decision: release gate passed for the first controlled beta send. The drill archive remains outside git, and `docs/beta-support-drill-result-2026-06-13.md` records the public summary.
 
 ## Allowed Beta Scope
 
@@ -86,10 +88,10 @@ For each beta tester:
 5. Ask the tester to complete `docs/beta-feedback-template-2026-06-13.md`.
 6. Record outcome, machine hash, signing time, and feedback status in the offline ledger using `docs/beta-operator-ledger-template-2026-06-13.md` as the field reference.
 
-Before first real-user beta send:
+Completed first-send gate:
 
-1. Run `docs/beta-support-drill-2026-06-13.md` with synthetic tester data.
-2. Archive drill request, license, verification output, feedback, and ledger copy outside git.
-3. Confirm no private key, real customer data, real ledger, or `_private` material enters git.
+1. Ran `docs/beta-support-drill-2026-06-13.md` with synthetic tester data.
+2. Archived drill request, license, verification output, feedback, and ledger copy outside git.
+3. Confirmed no private key, real customer data, real ledger, or `_private` material enters git.
 
 For the next readiness update, create a new dated document rather than editing package hashes in place.
