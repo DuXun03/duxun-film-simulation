@@ -14,11 +14,15 @@ Date: 2026-06-13
 
 Do not modify or repackage this zip unless a blocking issue is found and recorded with a new readiness document and new hashes.
 
+Run the beta support drill before sending the first real-user batch. After the drill passes, this package can move from operator handoff to the first controlled beta send.
+
 ## Beta Handoff Documents
 
 - Operator runbook: `docs/beta-operator-runbook-2026-06-13.md`
 - Customer test guide: `docs/beta-customer-test-guide-2026-06-13.md`
 - Feedback template: `docs/beta-feedback-template-2026-06-13.md`
+- Beta support drill: `docs/beta-support-drill-2026-06-13.md`
+- Operator ledger template: `docs/beta-operator-ledger-template-2026-06-13.md`
 - License custody reference: `docs/license-key-custody-and-issuance-2026-06-13.md`
 - Licensing QA record: `docs/licensing-mvp-qa-2026-06-12.md`
 
@@ -34,6 +38,8 @@ Current verified baseline:
 - Visual baseline remains frozen for Fuji Superia, Agfa Vista, and CineStill 800T.
 
 The package is suitable for controlled beta testers who can follow manual offline activation instructions and provide structured feedback.
+
+Current release decision: keep this package at beta handoff ready until `docs/beta-support-drill-2026-06-13.md` has been rehearsed and archived outside git. Send the first real-user batch only after the support drill confirms request intake, signing, activation troubleshooting, feedback capture, and ledger recording.
 
 ## Allowed Beta Scope
 
@@ -78,6 +84,12 @@ For each beta tester:
 3. Follow `docs/beta-operator-runbook-2026-06-13.md`.
 4. Send only `license.json`.
 5. Ask the tester to complete `docs/beta-feedback-template-2026-06-13.md`.
-6. Record outcome, machine hash, signing time, and feedback status in the offline ledger.
+6. Record outcome, machine hash, signing time, and feedback status in the offline ledger using `docs/beta-operator-ledger-template-2026-06-13.md` as the field reference.
+
+Before first real-user beta send:
+
+1. Run `docs/beta-support-drill-2026-06-13.md` with synthetic tester data.
+2. Archive drill request, license, verification output, feedback, and ledger copy outside git.
+3. Confirm no private key, real customer data, real ledger, or `_private` material enters git.
 
 For the next readiness update, create a new dated document rather than editing package hashes in place.

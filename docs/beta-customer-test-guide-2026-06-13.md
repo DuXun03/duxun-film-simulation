@@ -183,6 +183,18 @@ C:\ProgramData\DuXun\FilmSim\logs\license.log
 - Restart Resolve.
 - Send a screenshot of the viewer and the `License` section if it remains.
 
+## Screenshots And Feedback Files
+
+When reporting an install or activation issue, screenshots help us move faster. Please include:
+
+- The full command window after running `scripts\install.bat` or `scripts\install_license.bat`.
+- The Resolve `License` section showing the current status text.
+- The viewer if a watermark remains after activation.
+- The file list in `C:\ProgramData\DuXun\FilmSim` if activation files appear missing.
+- `C:\ProgramData\DuXun\FilmSim\logs\license.log` if the file exists.
+
+Please do not edit `activation-request.json`, `license.json`, or `license.log` before sending them.
+
 ## What To Send Back
 
 Please send the completed beta feedback template, plus any screenshots or short screen recordings that make the issue easier to understand.

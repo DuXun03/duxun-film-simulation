@@ -17,6 +17,19 @@ Do not rebuild or repackage the License MVP zip during beta operations. If a blo
 
 Production signing must use the `v1` private key that matches the public key embedded in this package. A dry-run, staging, or rehearsal key cannot activate real customer builds.
 
+## Drill Versus Real Issuance
+
+Support drills may use synthetic tester data and staging or dry-run signing material. Mark all drill files, ledger rows, and support notes with `DRILL_ONLY` or an equivalent label.
+
+Real customer issuance must use:
+
+- A real approved `customerId` and `orderId`.
+- The production `v1` private key matching the embedded public key.
+- A real offline operator ledger stored outside git.
+- A verified `license.json` generated for the customer's actual `machineHash`.
+
+Never mix drill and production materials. Do not send a dry-run or staging license to a real customer, even if local verification succeeds with a public-key override.
+
 ## Operator Materials
 
 Keep these materials outside git, outside package folders, and outside customer support attachments:
@@ -138,6 +151,8 @@ Do not send:
 - Issuance ledger rows.
 - Internal notes about request scoring.
 - Any `_private` archive material.
+- Dry-run or staging licenses for real customer authorization.
+- Screenshots that reveal private-key storage, operator ledgers, or signing workspaces.
 
 Customer instruction summary:
 
@@ -181,6 +196,33 @@ notes:
 ```
 
 Never record private key contents in the ledger. The ledger itself is internal operator material and must stay outside git and outside release packages.
+
+## Failure Case Records
+
+Record failures even when no license is issued. A refusal or manual-review entry should include:
+
+```text
+issuedAt:
+operator:
+decisionState:
+keyVersion:
+packageSha256:
+customerId:
+orderId:
+requestId:
+machineHash:
+activationRequestSha256:
+licenseJsonSha256:
+licenseType:
+expiresAt:
+reissueCount:
+supportCase:
+notes:
+```
+
+Use `licenseJsonSha256: none` and `licenseType: none` when no license is sent. In `notes`, record the user-visible failure code or support reason, such as malformed request, machine mismatch, invalid signature, stale Resolve state, refund, chargeback, or suspicious reissue pattern.
+
+Failure records must not include private-key paths, private-key contents, customer payment details, or full internal ledger exports.
 
 ## Machine Replacement
 
