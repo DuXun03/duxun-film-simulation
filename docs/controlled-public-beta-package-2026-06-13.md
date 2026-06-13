@@ -29,11 +29,11 @@ C:\Users\LI\Desktop\DuXunFilmSim-v5.0-公测包-2026-06-13
 根目录包含：
 
 ```text
-00-请先阅读-中文使用说明.md
+00-请先阅读-中文使用说明.docx
 一键安装插件.bat
 生成激活请求.bat
 安装授权文件.bat
-反馈模板-请填写.md
+反馈模板-请填写.docx
 校验信息-SHA256.txt
 DuXunFilmSim-OFX-v5.0-license-mvp
 ```
@@ -62,7 +62,7 @@ docs\licensing-trial-design-2026-06-12.md
 
 用户打开桌面交付文件夹后，流程为：
 
-1. 阅读 `00-请先阅读-中文使用说明.md`。
+1. 阅读 `00-请先阅读-中文使用说明.docx`。
 2. 关闭 DaVinci Resolve。
 3. 双击 `一键安装插件.bat`，必要时右键以管理员身份运行。
 4. 启动 Resolve，找到 `DuXun -> DuXun Film Simulation`。
@@ -72,7 +72,19 @@ docs\licensing-trial-design-2026-06-12.md
 8. 收到 `license.json` 后双击 `安装授权文件.bat`，按提示选择授权文件。
 9. 回到 Resolve 点击 `Reload License`，或重启 Resolve。
 10. 成功状态应为 `License: buyout activated`，水印应消失。
-11. 填写 `反馈模板-请填写.md`。
+11. 填写 `反馈模板-请填写.docx`。
+
+根目录中文说明和反馈模板已从 Markdown 转为 Word 格式。对应 SHA256：
+
+```text
+00-请先阅读-中文使用说明.docx
+ADF1A46E234256EC839D424F68FF9DF55D9DEA78E71C40A4364FCA5FCD3FF59D
+
+反馈模板-请填写.docx
+4B8B2F7B754BE253772494BF62F9DF8505DF5F79E77026F3D9FB71D434549960
+```
+
+DOCX 结构检查已通过：中文使用说明可解析出 87 个非空段落，反馈模板可解析出 46 个非空段落。当前机器缺少 DOCX 渲染器所需的外部转换程序，因此未完成 PNG 页面渲染视觉 QA。
 
 ## 安全检查结果
 
