@@ -62,6 +62,6 @@ These presets still need visual A/B calibration against reference material or be
 
 ## Future work
 
-1. Add a real 3D LUT sampler only after the OFX resource packaging and licensing boundary are clear.
+1. Add a real 3D LUT sampler after the OFX resource packaging format is clear.
 2. Keep `.cube` resources as source material until runtime loading, caching, and install packaging are designed.
 3. Add Resolve A/B screenshots for each brand group before marking visual calibration complete.

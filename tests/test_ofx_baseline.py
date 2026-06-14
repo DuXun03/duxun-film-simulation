@@ -27,19 +27,24 @@ class OfxBaselineTests(unittest.TestCase):
         self.assertIn("..\\..\\..\\openfx-sdk\\include", text)
         self.assertIn("OFX_SDK_NOT_FOUND", text)
 
-    def test_resolve_visual_ab_plan_is_documented_and_scripted(self):
-        script = read_text("scripts/resolve_visual_ab_plan.py")
-        doc = read_text("docs/resolve-visual-ab-2026-06-06.md")
+    def test_public_docs_describe_free_github_release_scope(self):
+        readme = read_text("README.md")
+        listing = read_text("docs/GITHUB_LISTING.md")
         for token in [
-            "Fuji Superia",
-            "Agfa Vista",
-            "CineStill 800T",
-            "CineStill 50D",
-            "Identity",
-            "do not automate activation",
+            "免费的 DaVinci Resolve OpenFX",
+            "54",
+            "DuXun Film Simulation",
+            "无试用限制",
+            "无水印",
         ]:
-            self.assertIn(token, script)
-            self.assertIn(token, doc)
+            self.assertIn(token, readme)
+        for token in [
+            "Free DaVinci Resolve OpenFX",
+            "54 film stocks",
+            "no account",
+            "source code",
+        ]:
+            self.assertIn(token, listing)
 
     def test_docs_describe_current_ofx_v5_baseline(self):
         readme = read_text("README.md")

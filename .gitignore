@@ -3,6 +3,8 @@
 
 # Local build outputs
 build/
+*.zip
+*.zip.sha256
 *.obj
 *.pdb
 *.ilk
@@ -29,3 +31,4 @@ Thumbs.db
 *.exr
 __pycache__/
 .pytest_cache/
+*.sqlite3

@@ -51,7 +51,7 @@ Prioritize plugin value over acceleration breadth:
 1. Film-look quality and preset behavior.
 2. Dehancer/Filmbox feature parity gaps.
 3. Stability and Resolve usability.
-4. Installer, licensing, trial/activation, and paid buyout delivery.
+4. Installer polish and packaged distribution.
 5. Documentation and release packaging.
 
 ## GPU log command

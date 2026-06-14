@@ -54,9 +54,9 @@ The current project uses this repository as a GPL-compatible reference for textu
 
 The plugin builds against OpenFX headers and follows the OpenFX Image Effect API.
 
-## t3mujinpack Data
+## t3mujinpack Preset Data
 
-- Included local data: `t3mujinpack-data`
-- License: MIT, as recorded in the local data package when present.
+- Included derived resources: `presets/film_stocks`
+- License: MIT, as recorded in the original data package.
 
 Preset and film-stock data are used as film simulation source material.
