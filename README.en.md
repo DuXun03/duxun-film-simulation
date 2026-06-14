@@ -28,6 +28,30 @@ DuXun Film Simulation brings common film looks, grain, halation, glow, gate moti
 - Build output: `build/DuXunFilmSim.ofx`
 - Windows install path: `C:\Program Files\Common Files\OFX\Plugins\DuXunFilmSim.ofx.bundle\Contents\Win64\DuXunFilmSim.ofx`
 
+## Install For Regular Windows Users
+
+Windows users who do not want to build from source should download the prebuilt package from GitHub Releases:
+
+```text
+DuXunFilmSimulation-v5.0-free-windows.zip
+```
+
+Download page:
+
+```text
+https://github.com/DuXun03/duxun-film-simulation/releases
+```
+
+How to install:
+
+1. Close DaVinci Resolve.
+2. Download and extract the zip.
+3. Double-click `Install.bat`.
+4. If Windows asks for administrator permission, choose Yes.
+5. Restart Resolve and find the plugin under `OpenFX > DuXun > DuXun Film Simulation`.
+
+The package includes Chinese and English guides, plus `Uninstall.bat`.
+
 ## Repository Layout
 
 ```text
@@ -72,6 +96,8 @@ film-sim-plugin/
 ```
 
 ## Build
+
+The steps below are for developers building from source. Regular users should use the one-click package from Releases.
 
 Run from the repository root:
 

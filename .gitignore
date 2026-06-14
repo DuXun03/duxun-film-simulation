@@ -3,6 +3,7 @@
 
 # Local build outputs
 build/
+dist/
 *.zip
 *.zip.sha256
 *.obj

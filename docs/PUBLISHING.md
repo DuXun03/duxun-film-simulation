@@ -31,6 +31,7 @@ git push origin v5.0-free
 
 - Tag: `v5.0-free`
 - Title: `DuXun Film Simulation v5.0 Free`
+- Windows asset: `DuXunFilmSimulation-v5.0-free-windows.zip`
 
 Release notes:
 
@@ -45,7 +46,33 @@ Highlights:
 - Film grain, halation, bloom, print response, film damage, film breath, gate weave, overscan, and vignette controls
 - No account gate, online service, or runtime restriction
 - Source code, build scripts, install scripts, tests, and third-party notices included
+- Prebuilt Windows zip with one-click installer, uninstaller, and bilingual instructions
 ```
+
+## Windows Release Package
+
+After a successful local Windows build, create the user-facing zip with:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\package_windows_release.ps1 -Version v5.0-free
+```
+
+The package is written to:
+
+```text
+dist\DuXunFilmSimulation-v5.0-free-windows.zip
+dist\DuXunFilmSimulation-v5.0-free-windows.zip.sha256
+```
+
+Upload the zip to the GitHub Release for `v5.0-free`. The zip contains:
+
+- `Install.bat`
+- `Uninstall.bat`
+- `README.zh-CN.md`
+- `README.en.md`
+- `LICENSE.txt`
+- `CHECKSUMS-SHA256.txt`
+- `DuXunFilmSim.ofx.bundle\Contents\Win64\DuXunFilmSim.ofx`
 
 ## Verification Before Publishing
 
@@ -54,6 +81,7 @@ Run:
 ```bat
 python -m unittest discover -s tests -q
 build_plugin.bat
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\package_windows_release.ps1 -Version v5.0-free
 ```
 
 The latest local verification passed with 59 unit tests and a successful Windows build.
